@@ -4,6 +4,11 @@ from typing import Dict
 from app.events.emitters import event_bus
 from fastapi import WebSocket
 
+from app.logger_module.utils import get_logger_factory
+
+get_logger = get_logger_factory(__name__)
+logger = get_logger()
+
 
 class WsConnection:
     def __init__(self):
@@ -111,4 +116,3 @@ async def handle_no_reply(device_id, data):
 @event_bus.on('got_reply')
 async def handle_got_reply(device_id, data, response):
     pass
-

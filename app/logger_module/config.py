@@ -40,7 +40,7 @@ class LoggingConfig:
 
         if self.settings.telegram_enabled:
             handlers["telegram"] = {
-                "()": "app.logger_module.telegram_handler.TelegramLogHandler",  # <-- путь к твоему классу
+                "()": "app.logger_module.telegram.TelegramLogHandler",  # <-- путь к твоему классу
                 "level": "INFO",  # или INFO
                 "formatter": 'telegram',
                 "bot_token": self.settings.telegram_bot_token,

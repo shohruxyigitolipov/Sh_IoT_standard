@@ -3,6 +3,8 @@ from fastapi.websockets import WebSocket, WebSocketDisconnect
 import asyncio
 from fastapi import status
 from app.ws.manager import ws_manager
+from app.device.service import DeviceService
+
 
 class WsHandler:
     async def handle_connection(self, websocket: WebSocket, device_id: int, service: DeviceService):
