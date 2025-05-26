@@ -5,7 +5,7 @@ from app.events.emitters import event_bus
 from fastapi import WebSocket
 
 
-class WSConnectionManager:
+class WsConnection:
     def __init__(self):
         self.active: dict[str, WebSocket] = {}
         self.pending = {}
@@ -90,7 +90,7 @@ class WSConnectionManager:
         return
 
 
-ws_manager = WSConnectionManager()
+ws_manager = WsConnection()
 
 
 @event_bus.on('websocket_added')
@@ -111,3 +111,4 @@ async def handle_no_reply(device_id, data):
 @event_bus.on('got_reply')
 async def handle_got_reply(device_id, data, response):
     pass
+
