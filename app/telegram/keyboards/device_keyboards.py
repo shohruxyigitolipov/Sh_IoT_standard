@@ -6,7 +6,7 @@ def main_kb() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text='Мои устройства', callback_data='my-devices')],
         [InlineKeyboardButton(text='Добавить устройство', callback_data='add-device')],
         [InlineKeyboardButton(text='Помощь', callback_data='devices-help')],
-        [InlineKeyboardButton(text='Панель управления', web_app=WebAppInfo(url='https://shiot-production.up.railway.app'))]
+        [InlineKeyboardButton(text='Панель управления', web_app=WebAppInfo(url='https://shiotstandard-production.up.railway.app/'))]
     ])
 
 
