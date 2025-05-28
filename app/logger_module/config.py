@@ -43,7 +43,7 @@ class LoggingConfig:
                 "()": "app.logger_module.telegram.TelegramLogHandler",  # <-- путь к твоему классу
                 "level": "INFO",  # или INFO
                 "formatter": 'telegram',
-                "bot_token": self.settings.telegram_bot_token,
+                "bot_token": self.settings.telegram_log_bot_token,
                 "chat_id": self.settings.telegram_chat_id,
             }
 

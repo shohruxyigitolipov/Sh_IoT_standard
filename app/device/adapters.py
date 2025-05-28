@@ -3,6 +3,7 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from app.device.device_state import device_state
 from app.ws.manager import ws_manager
 
 
@@ -22,60 +23,75 @@ class BaseDevice(ABC):
         return response
 
     @abstractmethod
-    async def turn_on(self) -> None:
+    async def turn_on(self, pin: int) -> None:
         pass
 
     @abstractmethod
-    async def turn_off(self) -> None:
+    async def turn_off(self, pin: int) -> None:
         pass
 
     @abstractmethod
-    async def set_state(self, state: bool) -> None:
+    async def set_state(self, pin: int, state: bool) -> None:
         pass
 
     @abstractmethod
-    async def set_timer(self, start_time: str, stop_time: str) -> None:
+    async def set_schedule(self, pin: int, on_time: str, off_time: str) -> None:
         pass
 
     @abstractmethod
-    async def get_status(self) -> Optional[bool]:
+    async def set_manual(self, pin: int):
+        pass
+
+    @abstractmethod
+    async def get_status(self, pin: int) -> Optional[bool]:
         pass
 
 
 class DeviceCommands(BaseDevice):
-    async def turn_on(self) -> None:
+    async def turn_on(self, pin: int) -> None:
+        device_state.set_state(pin, 'on')
         return await self.send_data_ws({
-            "action": "turn_on"
+            "action": "turn_on",
+            "pin": pin,
         })
 
-    async def turn_off(self) -> None:
+    async def turn_off(self, pin: int) -> None:
+        device_state.set_status(pin, 'off')
         return await self.send_data_ws({
-            "action": "turn_off"
+            "action": "turn_off",
+            "pin": pin,
         })
 
-    async def set_state(self, state: bool) -> None:
+    async def set_state(self, pin: int, state: int) -> None:
+        device_state.set_status(pin, state)
         return await self.send_data_ws({
             "action": "set_state",
+            "pin": pin,
             "state": state
         })
 
-    async def set_timer(self, start_time: str, stop_time: str) -> None:
+    async def set_schedule(self, pin: int, on_time: str, off_time: str) -> None:
+        device_state.set_schedule(pin, on_time, off_time)
         return await self.send_data_ws({
-            "action": "set_timer",
-            "start_time": start_time,
-            "stop_time": stop_time
+            "action": "set_schedule",
+            "pin": pin,
+            "on_time": on_time,
+            "off_time": off_time
         })
 
-    async def clear_timer(self) -> None:
+    async def set_manual(self, pin: int) -> None:
+        device_state.set_mode(pin, 'manual')
         return await self.send_data_ws({
-            "action": "clear_timer"
+            "action": "set_manual",
+            "pin": pin,
         })
 
-    async def get_status(self):
+    async def get_status(self, pin: int):
         """
         Запрос состояния устройства.
         :return: Ожидаемое состояние (если сервер отвечает).
         """
         return await self.send_data_ws({
-            "action": "get_status"
+            "action": "get_status",
+            "pin": pin,
         })

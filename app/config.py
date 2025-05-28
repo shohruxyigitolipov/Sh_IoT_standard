@@ -4,17 +4,18 @@ from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv('.env')
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL is None:
-    raise ValueError('Database URL not given!')
+BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+url1 = os.getenv('LOCAL_HOST')
+url2 = os.getenv('PUBLIC_HOST')
+selection = os.getenv('HOST_SELECT')
+url = url1 if selection == 1 else url2
 
 
 # Настройка логирования
 
 class LoggingSettings(BaseSettings):
     telegram_enabled: bool = True
-    telegram_bot_token: str = ""
+    telegram_log_bot_token: str = ""
     telegram_chat_id: str = ""
     level: str = "INFO"
     log_to_console: bool = True

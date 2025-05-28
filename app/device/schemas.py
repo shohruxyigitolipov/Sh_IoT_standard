@@ -1,39 +1,5 @@
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, Field
 from datetime import datetime
-
-
-class DeviceControl_request(BaseModel):
-    get_status: bool = False
-    state: bool | int | None = None
-    start_time: constr(pattern=r"^\d{2}:\d{2}$") | None = None
-    stop_time: constr(pattern=r"^\d{2}:\d{2}$") | None = None
-
-
-class DeviceCreate(BaseModel):
-    name: str
-
-
-class DeviceDataInfo(BaseModel):
-    registration_code: str
-    auth_token: str
-
-    class Config:
-        from_attributes = True
-
-
-class DeviceInfo(BaseModel):
-    id: int
-    name: str
-    last_seen: datetime | None = None
-    data: DeviceDataInfo
-
-    class Config:
-        from_attributes = True
-
-
-class DeviceControl_response(BaseModel):
-    response: str | dict
-    device_id: int
 
 
 class DeviceStatus_response(BaseModel):
@@ -54,8 +20,17 @@ class ErrorResponse(BaseModel):
     error: str
 
 
-class ActiveDevicesResponse(BaseModel):
-    active_devices: list
+class PinAction(BaseModel):
+    pin: int = Field(..., ge=0, le=39)
+    state: int
 
-    class Config:
-        arbitrary_types_allowed = True
+
+class ScheduleData(BaseModel):
+    pin: int
+    on_time: str  # "08:00"
+    off_time: str  # "20:00"
+
+
+class ModeData(BaseModel):
+    pin: int
+    mode: str  # "manual" | "auto"

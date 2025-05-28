@@ -1,5 +1,5 @@
-from utils.helpers import FastConnection
-from config import url
+from app.telegram.helpers import FastConnection
+from app.config import url
 
 
 class DeviceAPI:

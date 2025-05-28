@@ -3,12 +3,14 @@ from fastapi.websockets import WebSocket, WebSocketDisconnect
 import asyncio
 from fastapi import status
 from app.ws.manager import ws_manager
-from app.device.service import DeviceService
 
+async def verify_auth_token(token):
+    auth_token = 'abc123'
+    return token == auth_token
 
 class WsHandler:
-    async def handle_connection(self, websocket: WebSocket, device_id: int, service: DeviceService):
-        if not await self._authenticate(websocket, device_id, service):
+    async def handle_connection(self, websocket: WebSocket, device_id: int):
+        if not await self._authenticate(websocket, device_id):
             event_bus.emit('device_wrong_auth_token', device_id, websocket)
             await asyncio.sleep(3)
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
@@ -19,7 +21,7 @@ class WsHandler:
         await self._listen(websocket, device_id)
 
     @staticmethod
-    async def _authenticate(websocket: WebSocket, device_id: int, service: DeviceService) -> bool:
+    async def _authenticate(websocket: WebSocket, device_id: int) -> bool:
         try:
             data = await asyncio.wait_for(websocket.receive_json(), timeout=15)
         except asyncio.TimeoutError:
@@ -27,7 +29,7 @@ class WsHandler:
             return False
 
         token = data.get("auth_token") if isinstance(data, dict) else None
-        verified = await service.verify_auth_token(device_id, token)
+        verified = await verify_auth_token(token)
         return verified
 
     @staticmethod
