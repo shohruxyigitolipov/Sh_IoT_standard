@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Sh_IoT Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+  <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold mb-6 text-center">Админ-панель Sh_IoT</h1>
+
+    <div class="mb-6">
+      <label for="device_id" class="block mb-2 font-medium">ID устройства:</label>
+      <input id="device_id" type="number" placeholder="Введите ID устройства"
+             class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none">
+    </div>
+
+    <div class="flex space-x-4 mb-6">
+      <button onclick="controlDevice('on')" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">Включить</button>
+      <button onclick="controlDevice('off')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Выключить</button>
+      <button onclick="checkStatus()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">Статус</button>
+    </div>
+
+    <div class="mb-6">
+      <button onclick="fetchAllDevices()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded w-full">
+        Показать все устройства
+      </button>
+    </div>
+
+    <div id="log" class="text-sm text-gray-300 mb-4">Лог сообщений появится здесь...</div>
+
+    <table id="device_table" class="w-full text-sm text-left text-gray-400 hidden">
+      <thead class="text-xs uppercase bg-gray-700 text-gray-300">
+        <tr>
+          <th scope="col" class="px-4 py-2">ID</th>
+          <th scope="col" class="px-4 py-2">Название</th>
+          <th scope="col" class="px-4 py-2">Тип</th>
+        </tr>
+      </thead>
+      <tbody id="table_body" class="bg-gray-800"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const baseUrl = "https://shiot-production.up.railway.app";
+
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const user = tg.initDataUnsafe.user;
+    log(`Вы вошли как: ${user?.first_name || 'неизвестно'} (ID: ${user?.id || 'N/A'})`);
+
+    async function controlDevice(command) {
+      const deviceId = document.getElementById("device_id").value;
+      if (!deviceId) return log("Введите device_id");
+
+      const res = await fetch(`${baseUrl}/devices/control/${deviceId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: command })
+      });
+
+      const text = await res.text();
+      log(`Команда ${command} отправлена. Ответ: ${text}`);
+    }
+
+    async function checkStatus() {
+      const deviceId = document.getElementById("device_id").value;
+      if (!deviceId) return log("Введите device_id");
+
+      const res = await fetch(`${baseUrl}/devices/${deviceId}/status`);
+      const data = await res.json();
+      log(`Статус устройства ${deviceId}: ${JSON.stringify(data)}`);
+    }
+
+    async function fetchAllDevices() {
+      const res = await fetch(`${baseUrl}/devices/all`);
+      const data = await res.json();
+
+      const table = document.getElementById("device_table");
+      const tbody = document.getElementById("table_body");
+      tbody.innerHTML = "";
+
+      data.forEach(device => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="px-4 py-2">${device.id}</td>
+          <td class="px-4 py-2">${device.name || '-'}</td>
+          <td class="px-4 py-2">${device.device_type || '-'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      table.classList.remove("hidden");
+      log("Устройства загружены.");
+    }
+
+    function log(message) {
+      document.getElementById("log").innerText = message;
+    }
+  </script>
+</body>
+</html>
