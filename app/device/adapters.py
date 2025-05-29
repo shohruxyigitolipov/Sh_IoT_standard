@@ -72,6 +72,7 @@ class DeviceCommands(BaseDevice):
 
     async def set_schedule(self, pin: int, on_time: str, off_time: str) -> None:
         device_state.set_schedule(pin, on_time, off_time)
+        device_state.set_mode(pin, 'auto')
         return await self.send_data_ws({
             "action": "set_schedule",
             "pin": pin,

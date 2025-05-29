@@ -1,11 +1,14 @@
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
-
-from app.telegram.keyboards.device_keyboards import main_kb
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 user_rt = Router(name='users')
 
+def main_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Панель управления', web_app=WebAppInfo(url='https://shiotstandard-production.up.railway.app/'))],
+        [InlineKeyboardButton(text='Помощь', callback_data='devices-help')],
+    ])
 
 @user_rt.message(Command('start'))
 async def handle_start(msg: Message):

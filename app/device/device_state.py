@@ -1,16 +1,31 @@
-# app/device/state.py
-
 from typing import Dict, Literal
+from typing import cast
 
 PinMode = Literal["manual", "auto"]
 PinState = Literal[1, 0]
 
+DEFAULT_PIN_CONFIG = {
+    4: {"mode": "manual", "state": 0},
+    5: {"mode": "manual", "state": 0},
+    15: {"mode": "manual", "state": 0},
+    16: {"mode": "manual", "state": 0},
+    17: {"mode": "manual", "state": 0},
+    18: {"mode": "manual", "state": 0},
+    21: {"mode": "manual", "state": 0},
+    22: {"mode": "manual", "state": 0},
+    23: {"mode": "manual", "state": 0},
+}
+
 
 class DeviceStateManager:
     def __init__(self):
-        self.pin_modes: Dict[int, PinMode] = {}         # Режимы пинов
-        self.pin_status: Dict[int, PinState] = {}        # Текущий статус (вкл/выкл)
-        self.pin_schedule: Dict[int, Dict[str, str]] = {}  # on_time, off_time
+        self.pin_modes: Dict[int, PinMode] = {}
+        self.pin_status: Dict[int, PinState] = {}
+        self.pin_schedule: Dict[int, Dict[str, str]] = {}
+
+        for pin, cfg in DEFAULT_PIN_CONFIG.items():
+            self.pin_modes[pin] = cast(PinMode, cfg["mode"])
+            self.pin_status[pin] = cast(PinState, cfg["state"])
 
     def set_mode(self, pin: int, mode: PinMode):
         self.pin_modes[pin] = mode

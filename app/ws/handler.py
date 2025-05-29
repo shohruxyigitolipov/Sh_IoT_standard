@@ -4,9 +4,11 @@ import asyncio
 from fastapi import status
 from app.ws.manager import ws_manager
 
+
 async def verify_auth_token(token):
     auth_token = 'abc123'
     return token == auth_token
+
 
 class WsHandler:
     async def handle_connection(self, websocket: WebSocket, device_id: int):
@@ -37,7 +39,10 @@ class WsHandler:
         try:
             while True:
                 msg = await websocket.receive_text()
-                event_bus.emit('message_from_device', device_id, msg)
+                if 'ping' in msg:
+                    event_bus.emit('device_ping', device_id)
+                else:
+                    event_bus.emit('message_from_device', device_id, msg)
         except WebSocketDisconnect:
             event_bus.emit('websocket_disconnected', device_id)
             await ws_manager.remove(device_id)
