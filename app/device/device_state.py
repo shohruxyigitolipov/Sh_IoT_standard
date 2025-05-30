@@ -15,6 +15,7 @@ DEFAULT_PIN_CONFIG = {
     22: {"mode": "manual", "state": 0},
     23: {"mode": "manual", "state": 0},
 }
+const_pings = list(DEFAULT_PIN_CONFIG.keys())
 
 
 class DeviceStateManager:

@@ -4,9 +4,12 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, W
 
 user_rt = Router(name='users')
 
+url = f"wss://shiotstandard-production.up.railway.app"
+
+
 def main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text='Панель управления', web_app=WebAppInfo(url='https://shiotstandard-production.up.railway.app/'))],
+        [InlineKeyboardButton(text='Панель управления', web_app=WebAppInfo(url=url))],
         [InlineKeyboardButton(text='Помощь', callback_data='devices-help')],
     ])
 
