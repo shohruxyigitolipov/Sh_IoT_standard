@@ -36,3 +36,7 @@ templates = Jinja2Templates(directory="app/templates")
 async def welcome(request: Request):
     return templates.TemplateResponse('gpio_control_panel.html', {'request': request})
 
+
+@app.get('/test', response_class=HTMLResponse)
+async def test(request: Request):
+    return templates.TemplateResponse('test.html', {'request': request})

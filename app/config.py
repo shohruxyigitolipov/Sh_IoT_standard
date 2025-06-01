@@ -5,10 +5,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv('.env')
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-url1 = os.getenv('LOCAL_HOST')
-url2 = os.getenv('PUBLIC_HOST')
-selection = os.getenv('HOST_SELECT')
-url = url1 if selection == 1 else url2
+url = os.getenv('PUBLIC_HOST')
+
 
 
 # Настройка логирования

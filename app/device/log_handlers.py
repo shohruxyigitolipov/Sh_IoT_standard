@@ -6,26 +6,26 @@ logger = get_logger()
 
 @event_bus.on('new_device')
 async def handle_new_device(device_id):
-    logger.info(f'Новое устройство: {device_id}')
+    logger.debug(f'Новое устройство: {device_id}')
 
 @event_bus.on("device_connected")
 async def handle_connect(device_id):
-    logger.info(f'✅ Устройство {device_id} подключено.')
+    logger.debug(f'✅ Устройство {device_id} подключено.')
 
 
 @event_bus.on("device_disconnected")
 async def handle_disconnect(device_id):
-    logger.info(f"[{device_id}] Сессия завершена и удалена.❌")
+    logger.debug(f"[{device_id}] Сессия завершена и удалена.❌")
 
 
 @event_bus.on("message_from_device")
 async def handle_message(device_id, message):
-    logger.info(f"📨 {device_id} прислал: {message}")
+    logger.debug(f"📨 {device_id} прислал: {message}")
 
 
 @event_bus.on('message_to_device')
 async def handle_message_to_device(device_id, message):
-    logger.info(f'{device_id} Отправлено сообщение: {message}')
+    logger.debug(f'{device_id} Отправлено сообщение: {message}')
 
 
 @event_bus.on('device_timeout')
@@ -35,34 +35,34 @@ async def handle_timeout(device_id, last_pong_time):
 
 @event_bus.on('device_send_error')
 async def handle_send_error(device_id, error):
-    logger.warning(f'[{device_id}], Ошибка отправки команды: {error}')
+    logger.debug(f'[{device_id}], Ошибка отправки команды: {error}')
 
 
 @event_bus.on('device_error')
 async def handle_error(device_id, error):
-    logger.error(f"[{device_id}] Ошибка в работе устройства: {error}")
+    logger.debug(f"[{device_id}] Ошибка в работе устройства: {error}")
 
 
 @event_bus.on('device_session_end')
 async def handle_session_end(device_id):
-    logger.info(f'[{device_id}], Сессия завершена')
+    logger.debug(f'[{device_id}], Сессия завершена')
 
 
 @event_bus.on('device_wrong_auth_token')
 async def handle_auth_token_wrong(device_id):
-    logger.info(f'[{device_id}], Неверный auth_token')
+    logger.debug(f'[{device_id}], Неверный auth_token')
 
 
 @event_bus.on('message_failed')
 async def handle_message_failed(device_id, message):
-    logger.error(f"[{device_id}], Сообщение: {message} возможно не дошло")
+    logger.debug(f"[{device_id}], Сообщение: {message} возможно не дошло")
     raise RuntimeError(f'Websocket for device {device_id} not found')
 
 
 @event_bus.on('no_reply')
 async def handle_no_message(device_id, message):
-    logger.info(f"[{device_id}], Устройство не ответил на сообщение: {message}")
+    logger.debug(f"[{device_id}], Устройство не ответил на сообщение: {message}")
 
 @event_bus.on('got_reply')
 async def handle_reply_message(device_id, data, response):
-    logger.info(f'[{device_id}], Ответ от устройства. Запрос: {data}\nОтвет: {response}')
+    logger.debug(f'[{device_id}], Ответ от устройства. Запрос: {data}\nОтвет: {response}')
