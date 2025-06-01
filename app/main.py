@@ -39,4 +39,4 @@ async def welcome(request: Request):
 
 @app.get('/test', response_class=HTMLResponse)
 async def test(request: Request):
-    return templates.TemplateResponse('gpi_control_panel.html', {'request': request})
+    return templates.TemplateResponse('gpio_control_panel.html', {'request': request})
