@@ -1,12 +1,13 @@
 import os
 
+from pyee.asyncio import AsyncIOEventEmitter
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv('.env')
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 url = os.getenv('PUBLIC_HOST')
-
+event_bus = AsyncIOEventEmitter()
 
 
 # Настройка логирования
@@ -24,7 +25,7 @@ class LoggingSettings(BaseSettings):
     formatter: str = "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
     telegram_formatter: str = "[%(levelname)s] %(name)s:%(lineno)d\n%(message)s"
     model_config = SettingsConfigDict(
-        env_file=".env",              # путь до вашего .env
-        env_file_encoding="utf-8",    # кодировка .env
+        env_file=".env",  # путь до вашего .env
+        env_file_encoding="utf-8",  # кодировка .env
         extra='ignore'
     )
