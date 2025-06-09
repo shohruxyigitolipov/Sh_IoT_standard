@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from starlette.responses import HTMLResponse
+from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from app.config import LoggingSettings
@@ -28,15 +29,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="app/webapp"), name="static")
 app.include_router(device_rt)
 templates = Jinja2Templates(directory="app/templates")
-
+templates2 = Jinja2Templates(directory='app/webapp')
 
 @app.get('/', response_class=HTMLResponse)
 async def welcome(request: Request):
-    return templates.TemplateResponse('gpio_control_panel_v2.html', {'request': request})
+    return templates2.TemplateResponse('index.html', {'request': request})
 
 
 @app.get('/test', response_class=HTMLResponse)
 async def test(request: Request):
-    return templates.TemplateResponse('gpio_control_panel.html', {'request': request})
+    return templates.TemplateResponse('gpio_control_panel_v2.html', {'request': request})
