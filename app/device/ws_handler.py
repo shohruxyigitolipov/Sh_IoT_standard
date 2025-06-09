@@ -1,4 +1,4 @@
-from app.device.events import event_bus
+from app.config import event_bus
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 import asyncio
 from fastapi import status

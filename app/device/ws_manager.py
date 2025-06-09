@@ -1,6 +1,6 @@
 import asyncio
 import json
-from app.device.events import event_bus
+from app.config import event_bus
 from fastapi import WebSocket
 
 from app.logger_module.utils import get_logger_factory

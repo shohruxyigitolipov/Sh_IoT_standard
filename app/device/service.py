@@ -1,15 +1,11 @@
 import uuid
 from abc import ABC, abstractmethod
-from typing import Dict, Literal
+from typing import Dict
 from typing import cast
 
 from app.device.ws_manager import device_ws_manager, web_ws_manager
+from config import pins_config, PinState, PinMode
 from device.schemas import SetState, SetMode, SetSchedule
-
-PinMode = Literal["manual", "auto"]
-PinState = Literal[1, 0]
-const_pins = [4, 5, 15, 16, 17, 18, 21, 22, 23]
-pins_config = {i: {'mode': 'manual', 'state': 0} for i in const_pins}
 
 
 class DeviceStateManager:
@@ -54,7 +50,7 @@ class BaseDevice(ABC):
     def __init__(self, device_id: int):
         self.device_id = device_id
 
-    async def send_data_ws(self, data: dict) -> None:
+    async def send_data_ws(self, data: dict) -> dict:
         """
         Отправка данных устройству через WebSocket.
         :param data: JSON-словарь команды.
