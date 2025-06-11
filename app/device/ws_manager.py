@@ -56,14 +56,9 @@ class DeviceWsConnection:
             return False
         return True
 
-    async def get(self, device_id) -> WebSocket | None:
-        return self.active.get(device_id)
-
-    async def get_list(self):
-        return list(self.active.keys())
-
     async def send_personal(self, device_id: int, data: str | dict,
                             request_id: str = None, timeout: float = 5) -> dict | None | bool:
+
         ws = self.active.get(device_id)
         if ws:
             if isinstance(data, dict):
@@ -86,7 +81,6 @@ class DeviceWsConnection:
                     self.pending[device_id].pop(request_id, None)
             return None
         else:
-
             event_bus.emit('message_failed', device_id, data)
 
     async def set_response(self, device_id: int, response: dict | str):
@@ -103,10 +97,6 @@ class DeviceWsConnection:
             if not future.done():
                 future.set_result(response)
         return
-
-
-device_ws_manager = DeviceWsConnection()
-web_ws_manager = WebWsConnection()
 
 
 @event_bus.on('message_failed')

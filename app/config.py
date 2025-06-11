@@ -1,9 +1,9 @@
 import os
 from typing import Literal
 
-from pyee.asyncio import AsyncIOEventEmitter
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pyee.asyncio import AsyncIOEventEmitter
 
 load_dotenv('.env')
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')

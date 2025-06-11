@@ -2,7 +2,6 @@ from fastapi import WebSocket
 
 from device.service import DeviceCommands
 from app.device.ws_handler import ws_handler
-from app.device.ws_manager import device_ws_manager, web_ws_manager
 
 from app.logger_module.utils import get_logger_factory
 from fastapi import APIRouter

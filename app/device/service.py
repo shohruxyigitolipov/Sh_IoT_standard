@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 from typing import Dict
 from typing import cast
 
-from app.device.ws_manager import device_ws_manager, web_ws_manager
+
 from config import pins_config, PinState, PinMode
+from device.managers import web_ws_manager, device_ws_manager
 from device.schemas import SetState, SetMode, SetSchedule
 
 
@@ -96,6 +97,7 @@ class DeviceCommands(BaseDevice):
             await device_state.set_state(pin=pin, state=0)
 
     async def set_state(self, pin: int, state: int) -> None:
+        print(f"State: {state}")
         data = SetState(pin=pin, state=state).model_dump()
         response = await self.send_data_ws(data)
         if response['result'] == 'ok':

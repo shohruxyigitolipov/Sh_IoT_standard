@@ -5,8 +5,9 @@ from fastapi.websockets import WebSocket, WebSocketDisconnect
 import asyncio
 from fastapi import status
 
-from app.device.ws_manager import web_ws_manager, device_ws_manager
+
 from app.logger_module.utils import get_logger_factory
+from device.managers import web_ws_manager, device_ws_manager
 
 get_logger = get_logger_factory(__name__)
 logger = get_logger()
@@ -58,9 +59,9 @@ class DeviceWsHandler:
             await asyncio.sleep(3)
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-
         event_bus.emit('device_ws_connected', websocket)
         await device_ws_manager.add(device_id, websocket)
+
         await self._listen(websocket, device_id)
 
     @staticmethod
