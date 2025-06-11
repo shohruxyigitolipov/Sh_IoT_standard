@@ -70,7 +70,7 @@ class DeviceWsConnection:
                 if request_id:
                     data["request_id"] = request_id
                 data = json.dumps(data, ensure_ascii=False)
-            await ws.send_text(data)
+            await ws.send_json(data)
 
             if request_id:
                 future = asyncio.get_event_loop().create_future()

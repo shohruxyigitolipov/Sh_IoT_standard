@@ -1,3 +1,5 @@
+import uuid
+
 from app.config import event_bus
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 import asyncio
@@ -17,21 +19,21 @@ async def verify_auth_token(token):
 
 class WebWsHandler:
     async def handle(self, websocket: WebSocket, device_id: int):
-        if not await self._authenticate(websocket, device_id):
-            event_bus.emit('web_ws_wrong_auth_token', device_id, websocket)
+        if not await self._authenticate(websocket):
+            event_bus.emit('web_ws_wrong_auth_token', websocket)
             await asyncio.sleep(3)
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-        event_bus.emit('web_ws_connected', device_id)
+        event_bus.emit('web_ws_connected', websocket)
         await web_ws_manager.add(device_id=device_id, ws=websocket)
         await self._listen(websocket, device_id)
 
     @staticmethod
-    async def _authenticate(websocket: WebSocket, device_id: int) -> bool:
+    async def _authenticate(websocket: WebSocket) -> bool:
         try:
             data = await asyncio.wait_for(websocket.receive_json(), timeout=15)
         except asyncio.TimeoutError:
-            event_bus.emit('web_ws_timeout', device_id)
+            event_bus.emit('web_ws_timeout', websocket)
             return False
         token = data.get('auth_token', None)
         verified = await verify_auth_token(token)
@@ -52,12 +54,12 @@ class WebWsHandler:
 class DeviceWsHandler:
     async def handle(self, websocket: WebSocket, device_id: int):
         if not await self._authenticate(websocket, device_id):
-            event_bus.emit('device_ws_wrong_auth_token', device_id, websocket)
+            event_bus.emit('device_ws_wrong_auth_token', websocket)
             await asyncio.sleep(3)
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
 
-        event_bus.emit('device_ws_connected', device_id)
+        event_bus.emit('device_ws_connected', websocket)
         await device_ws_manager.add(device_id, websocket)
         await self._listen(websocket, device_id)
 
@@ -66,7 +68,7 @@ class DeviceWsHandler:
         try:
             data = await asyncio.wait_for(websocket.receive_json(), timeout=15)
         except asyncio.TimeoutError:
-            event_bus.emit('device_ws_timeout', device_id)
+            event_bus.emit('device_ws_timeout', websocket)
             return False
 
         token = data.get("auth_token") if isinstance(data, dict) else None
@@ -91,42 +93,4 @@ ws_handler = DeviceWsHandler()
 web_ws_handler = WebWsHandler()
 
 
-@event_bus.on('device_ws_connected')
-async def handle_connection(device_id):
-    await device_ws_manager.send_personal(device_id, 'Вы подключились')
 
-
-@event_bus.on('device_ws_timeout')
-async def handle_timeout(device_id):
-    await device_ws_manager.send_personal(device_id, 'Время ожидания истекло!')
-
-
-@event_bus.on('device_ws_wrong_auth_token')
-async def handle_wrong_auth_token(device_id, websocket):
-    await websocket.send_text('Неверный auth_token')  # сообщение устройству
-
-
-@event_bus.on('message_from_device_ws')
-async def handle_message_from_device(device_id, message):
-    print(f'[{device_id}] device_msg: {message}')
-
-
-# web
-@event_bus.on('web_ws_connected')
-async def handle_connection(device_id):
-    await device_ws_manager.send_personal(device_id, 'Вы подключились')
-
-
-@event_bus.on('web_ws_timeout')
-async def handle_timeout(device_id):
-    await device_ws_manager.send_personal(device_id, 'Время ожидания истекло!')
-
-
-@event_bus.on('web_ws_wrong_auth_token')
-async def handle_wrong_auth_token(websocket):
-    await websocket.send_text('Неверный auth_token')  # сообщение устройству
-
-
-@event_bus.on('message_from_web_ws')
-async def handle_message_from_device(device_id, message):
-    print(f'[{device_id}] message from web: {message}')

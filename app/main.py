@@ -22,7 +22,9 @@ def get_logger(name: str = __name__) -> logging.Logger:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from app.device import events
+    from app.device import device_events
+    from app.device import web_events
+    from app.device import logs
     loop = asyncio.get_event_loop()
     loop.create_task(run_telegram_bot())
     yield
