@@ -1,12 +1,11 @@
 import asyncio
 import json
-from app.config import event_bus
+from app.config.config import event_bus
 from fastapi import WebSocket
 
-from app.logger_module.utils import get_logger_factory
+from infrastructure.logger_module import api_logger
 
-get_logger = get_logger_factory(__name__)
-logger = get_logger()
+logger = api_logger
 
 
 class WebWsConnection:
@@ -72,11 +71,11 @@ class DeviceWsConnection:
                 self.pending.setdefault(device_id, {})[request_id] = future
                 try:
                     response = await asyncio.wait_for(future, timeout=timeout)
-                    await self.set_response(device_id=device_id, response=response)
-                    event_bus.emit('got_reply', device_id, data, str(response))
+
+                    event_bus.emit('got_reply', device_id)
                     return response
                 except asyncio.TimeoutError:
-                    event_bus.emit(f'no_reply', device_id, data)
+                    event_bus.emit(f'no_reply', device_id)
                 finally:
                     self.pending[device_id].pop(request_id, None)
             return None
@@ -97,6 +96,10 @@ class DeviceWsConnection:
             if not future.done():
                 future.set_result(response)
         return
+
+
+device_ws_manager = DeviceWsConnection()
+web_ws_manager = WebWsConnection()
 
 
 @event_bus.on('message_failed')

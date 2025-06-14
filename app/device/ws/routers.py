@@ -1,15 +1,10 @@
+from fastapi import APIRouter
 from fastapi import WebSocket
 
-from device.service import DeviceCommands
-from app.device.ws_handler import ws_handler
+from device.ws import ws_handler, web_ws_handler
+from infrastructure.logger_module import api_logger
 
-from app.logger_module.utils import get_logger_factory
-from fastapi import APIRouter
-
-from device.ws_handler import web_ws_handler
-
-get_logger = get_logger_factory(__name__)
-logger = get_logger()
+logger = api_logger
 
 router = APIRouter(prefix='/devices')
 

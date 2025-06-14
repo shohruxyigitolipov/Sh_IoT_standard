@@ -1,16 +1,14 @@
-import uuid
-
-from app.config import event_bus
-from fastapi.websockets import WebSocket, WebSocketDisconnect
 import asyncio
+
 from fastapi import status
+from fastapi.websockets import WebSocket, WebSocketDisconnect
 
+from app.config.config import event_bus
+from device.ws.websocket_connection_manager import device_ws_manager, web_ws_manager
 
-from app.logger_module.utils import get_logger_factory
-from device.managers import web_ws_manager, device_ws_manager
+from infrastructure.logger_module import api_logger
 
-get_logger = get_logger_factory(__name__)
-logger = get_logger()
+logger = api_logger
 
 
 async def verify_auth_token(token):
@@ -88,10 +86,3 @@ class DeviceWsHandler:
         except WebSocketDisconnect:
             event_bus.emit('device_ws_disconnected', device_id)
             await device_ws_manager.remove(device_id)
-
-
-ws_handler = DeviceWsHandler()
-web_ws_handler = WebWsHandler()
-
-
-

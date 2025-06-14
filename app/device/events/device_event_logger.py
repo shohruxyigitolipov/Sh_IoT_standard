@@ -1,8 +1,8 @@
-from app.config import event_bus
-from app.logger_module.utils import get_logger_factory
+from app.config.config import event_bus
+from infrastructure.logger_module import device_logger
 
-get_logger = get_logger_factory(__name__)
-logger = get_logger()
+
+logger = device_logger
 
 @event_bus.on('new_device')
 async def handle_new_device(device_id):
@@ -59,10 +59,3 @@ async def handle_message_failed(device_id, message):
     raise RuntimeError(f'Websocket for device {device_id} not found')
 
 
-@event_bus.on('no_reply')
-async def handle_no_message(device_id, message):
-    logger.debug(f"[{device_id}], Устройство не ответил на сообщение: {message}")
-
-@event_bus.on('got_reply')
-async def handle_reply_message(device_id, data, response):
-    logger.debug(f'[{device_id}], Ответ от устройства. Запрос: {data}\nОтвет: {response}')

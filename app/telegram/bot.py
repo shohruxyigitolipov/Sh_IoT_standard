@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
-from app.config import BOT_TOKEN
+from app.config.config import BOT_TOKEN
 import pytz
 from datetime import datetime
 

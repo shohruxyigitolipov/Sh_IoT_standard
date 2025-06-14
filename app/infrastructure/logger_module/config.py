@@ -1,6 +1,6 @@
 # logging_config.py
 from logging.config import dictConfig
-from app.config import LoggingSettings
+from app.config.config import LoggingSettings
 
 
 class LoggingConfig:
@@ -40,7 +40,7 @@ class LoggingConfig:
 
         if self.settings.telegram_enabled:
             handlers["telegram"] = {
-                "()": "app.logger_module.telegram.TelegramLogHandler",  # <-- путь к твоему классу
+                "()": "app.infrastructure.logger_module.telegram.TelegramLogHandler",  # <-- путь к твоему классу
                 "level": "DEBUG",  # или INFO
                 "formatter": 'telegram',
                 "bot_token": self.settings.telegram_log_bot_token,

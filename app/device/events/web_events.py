@@ -1,8 +1,7 @@
-import uuid
+from app.config.config import event_bus
+from app.config.container import get_device_service
 
-from app.config import event_bus
-from device.managers import device_ws_manager
-from device.service import DeviceCommands
+device_service = get_device_service()
 
 
 # web
@@ -24,7 +23,5 @@ async def handle_web_wrong_auth_token(websocket):
 @event_bus.on('message_from_web_ws')
 async def handle_message_from_device(device_id, message):
     print(f'[{device_id}] message from web: {message}')
-    # request_id = str(uuid.uuid4())
-    # message['request_id'] = request_id
-    await DeviceCommands(device_id=1).set_state(pin=4, state=1)
-    # await device_ws_manager.send_personal(device_id=int(device_id), data=message)
+    await device_service.set_state(device_id=device_id, pin=4, state=1)
+

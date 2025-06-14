@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, model_validator, Field, TypeAdapter
+from pydantic import BaseModel, field_validator
 
 
 class PinStateMessage(BaseModel):

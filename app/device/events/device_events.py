@@ -1,6 +1,5 @@
-from app.config import event_bus
-from device.managers import device_ws_manager, web_ws_manager
-from device.service import DeviceCommands
+from app.config.config import event_bus
+from device.ws.websocket_connection_manager import device_ws_manager
 
 
 @event_bus.on('device_ws_connected')
@@ -21,6 +20,4 @@ async def handle_device_wrong_auth_token(websocket):
 @event_bus.on('message_from_device_ws')
 async def handle_message_from_device(device_id, message):
     print(f'[{device_id}] device_msg: {message}')
-
-    await web_ws_manager.send_personal(device_id=1, data=message)
-
+    await device_ws_manager.set_response(device_id=device_id, response=message)

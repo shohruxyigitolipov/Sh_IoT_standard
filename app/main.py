@@ -7,10 +7,10 @@ from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from app.config import LoggingSettings
-from app.device.routers import router as device_rt
-from app.logger_module.config import LoggingConfig
+from app.config.config import LoggingSettings
 from app.telegram.bot import run_telegram_bot
+from device.ws.routers import router as device_rt
+from infrastructure.logger_module.config import LoggingConfig
 
 settings = LoggingSettings()  # прочитает .env автоматически
 LoggingConfig(settings).setup()
@@ -22,9 +22,7 @@ def get_logger(name: str = __name__) -> logging.Logger:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from app.device import device_events
-    from app.device import web_events
-    from app.device import logs
+    from app.device import events
     loop = asyncio.get_event_loop()
     loop.create_task(run_telegram_bot())
     yield
