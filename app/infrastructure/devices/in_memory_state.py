@@ -1,8 +1,9 @@
 from typing import Dict, cast
 
 from config.config import pins_config, PinMode, PinState
-from device.schemas import SetMode, SetSchedule
-from device.ws.websocket_connection_manager import web_ws_manager
+from application.devices.commands import SetMode, SetSchedule
+from infrastructure.web_interface.ws_manager import web_ws_manager
+
 from domain.devices.interfaces import IDeviceStateManager
 
 
@@ -23,7 +24,6 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
 
     async def set_state(self, pin: int, state: PinState):
         self.pin_state[pin] = state
-
 
     async def set_schedule(self, pin: int, on_time: str, off_time: str):
         self.pin_schedule[pin] = {'on': on_time, 'off': off_time}

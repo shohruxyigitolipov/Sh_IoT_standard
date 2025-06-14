@@ -1,5 +1,6 @@
 from app.config.config import event_bus
-from device.ws.websocket_connection_manager import device_ws_manager
+from infrastructure.devices.ws_manager import device_ws_manager
+
 
 
 @event_bus.on('device_ws_connected')

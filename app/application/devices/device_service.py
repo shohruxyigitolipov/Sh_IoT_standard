@@ -1,5 +1,5 @@
 
-from device.schemas import SetState, SetMode, SetSchedule
+from application.devices.commands import SetState, SetMode, SetSchedule
 from domain.devices.interfaces import IDeviceSender, IDeviceStateManager
 from infrastructure.devices.ws_sender import WebSocketWebSender
 
@@ -29,7 +29,7 @@ class DeviceService:
         response = await self.sender.send(device_id, data)
         if response['result'] == 'ok':
             await self.state.set_state(pin, state)
-            await self.sender_web.send(device_id=1, data=data)
+            await self.sender_web.send(device_id=device_id, data=data)
 
     async def set_schedule(self, device_id: int, pin: int, on_time: str, off_time: str):
         data = SetSchedule(pin=pin, on_time=on_time, off_time=off_time).model_dump()

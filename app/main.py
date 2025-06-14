@@ -9,7 +9,7 @@ from starlette.templating import Jinja2Templates
 
 from app.config.config import LoggingSettings
 from app.telegram.bot import run_telegram_bot
-from device.ws.routers import router as device_rt
+from interface.device.routers import router as device_rt
 from infrastructure.logger_module.config import LoggingConfig
 
 settings = LoggingSettings()  # прочитает .env автоматически
@@ -22,7 +22,6 @@ def get_logger(name: str = __name__) -> logging.Logger:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from app.device import events
     loop = asyncio.get_event_loop()
     loop.create_task(run_telegram_bot())
     yield
