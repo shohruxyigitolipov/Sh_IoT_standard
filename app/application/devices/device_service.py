@@ -49,3 +49,11 @@ class DeviceService:
         if self._is_success(response):
             await self.state.set_mode(data=data)
             await self.sender_web.send(device_id=device_id, data=data.model_dump())
+
+    async def get_state(self, pin: int):
+        state = await self.state.get_state(pin=pin)
+        return state
+
+    async def get_mode(self, pin: int):
+        mode = await self.state.get_mode(pin)
+        return mode

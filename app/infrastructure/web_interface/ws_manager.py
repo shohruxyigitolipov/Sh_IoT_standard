@@ -31,10 +31,13 @@ class WebClientWebSocketManager:
 
     async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
         ws = self.active.get(device_id)
+        print(f'active: {self.active.get(device_id)}')
         if ws:
             if isinstance(data, dict):
                 data = json.dumps(data, ensure_ascii=False)
-            await ws.send_text(data)
+                await ws.send_json(data=data)
+            else:
+                await ws.send_text(data)
         else:
             event_bus.emit('message_failed', device_id, data)
 

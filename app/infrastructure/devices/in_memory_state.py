@@ -1,4 +1,4 @@
-from typing import Dict, cast
+from typing import Dict, cast, Any, Coroutine, Literal
 
 from app.config.config import pins_config, PinMode, PinState
 from app.application.devices.commands import SetMode, SetSchedule, SetState
@@ -28,11 +28,11 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
         self.pin_schedule[data.pin] = {'on': data.on_time, 'off': data.off_time}
         await web_ws_manager.send_personal(device_id=1, data=data.model_dump())
 
-    async def get_mode(self, pin: int) -> PinMode:
-        return self.pin_modes.get(pin, PinMode.manual)
+    async def get_mode(self, pin) -> Literal["manual", "auto"] | None:
+        return self.pin_modes.get(pin)
 
     async def get_state(self, pin: int) -> PinState:
-        return self.pin_state.get(pin, PinState.OFF)
+        return self.pin_state.get(pin)
 
     async def get_schedule(self, pin: int) -> Dict[str, str]:
         return self.pin_schedule.get(pin, {})
