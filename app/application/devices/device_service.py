@@ -1,8 +1,8 @@
 from typing import Literal
 
-from application.devices.commands import SetState, SetMode, SetSchedule
-from domain.devices.interfaces import IDeviceSender, IDeviceStateManager
-from infrastructure.web_interface.ws_sender import WebSocketWebSender
+from app.application.devices.commands import SetState, SetMode, SetSchedule
+from app.domain.devices.interfaces import IDeviceSender, IDeviceStateManager
+from app.infrastructure.web_interface.ws_sender import WebSocketWebSender
 
 
 class DeviceService:

@@ -1,7 +1,7 @@
 import uuid
 
-from domain.devices.interfaces import IDeviceSender, IWebSender
-from infrastructure.devices.ws_manager import device_ws_manager
+from app.domain.devices.interfaces import IDeviceSender, IWebSender
+from app.infrastructure.devices.ws_manager import device_ws_manager
 
 
 class WebSocketDeviceSender(IDeviceSender):

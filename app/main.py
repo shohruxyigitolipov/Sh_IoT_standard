@@ -9,9 +9,9 @@ from starlette.templating import Jinja2Templates
 
 from app.config.config import LoggingSettings
 from app.telegram.bot import run_telegram_bot
-from interface.device.routers import router as device_rt
-from interface.web.routers import router as web_interface_rt
-from infrastructure.logger_module.config import LoggingConfig
+from app.interface.device.routers import router as device_rt
+from app.interface.web.routers import router as web_interface_rt
+from app.infrastructure.logger_module.config import LoggingConfig
 
 settings = LoggingSettings()  # прочитает .env автоматически
 LoggingConfig(settings).setup()

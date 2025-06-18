@@ -4,8 +4,8 @@ from fastapi import status
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
 from app.config.config import event_bus
-from infrastructure.devices.ws_manager import device_ws_manager
-from infrastructure.logger_module.utils import get_logger_factory
+from app.infrastructure.devices.ws_manager import device_ws_manager
+from app.infrastructure.logger_module.utils import get_logger_factory
 
 get_logger = get_logger_factory(__name__)
 logger = get_logger()

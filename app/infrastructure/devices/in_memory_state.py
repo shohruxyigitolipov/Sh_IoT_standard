@@ -1,10 +1,10 @@
 from typing import Dict, cast
 
-from config.config import pins_config, PinMode, PinState
-from application.devices.commands import SetMode, SetSchedule, SetState
-from infrastructure.web_interface.ws_manager import web_ws_manager
+from app.config.config import pins_config, PinMode, PinState
+from app.application.devices.commands import SetMode, SetSchedule, SetState
+from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
-from domain.devices.interfaces import IDeviceStateManager
+from app.domain.devices.interfaces import IDeviceStateManager
 
 
 class InMemoryDeviceStateManager(IDeviceStateManager):

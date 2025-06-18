@@ -1,7 +1,7 @@
-from application.devices.device_service import DeviceService
-from infrastructure.devices.in_memory_state import InMemoryDeviceStateManager
-from infrastructure.devices.ws_sender import WebSocketDeviceSender
-from infrastructure.web_interface.ws_sender import WebSocketWebSender
+from app.application.devices.device_service import DeviceService
+from app.infrastructure.devices.in_memory_state import InMemoryDeviceStateManager
+from app.infrastructure.devices.ws_sender import WebSocketDeviceSender
+from app.infrastructure.web_interface.ws_sender import WebSocketWebSender
 
 
 def get_device_service() -> DeviceService:

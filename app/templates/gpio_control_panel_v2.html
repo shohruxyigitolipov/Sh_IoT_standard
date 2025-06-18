@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Sh_IoT WebApp GPIO Control (v2)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <title>Sh_IoT WebApp GPIO Control (v2)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6">
-  <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
+<div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
     <h1 class="text-2xl font-bold mb-4 text-center">Управление GPIO (ESP32-S3)</h1>
 
     <div id="user_info" class="text-center text-gray-400 mb-6">Загрузка пользователя...</div>
@@ -15,32 +15,32 @@
     <div id="pins_container" class="space-y-4"></div>
 
     <div class="mt-8 text-sm text-gray-300" id="log">Лог: ...</div>
-  </div>
+</div>
 
-  <!-- Модальное окно для задания расписания -->
-  <div id="schedule_modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+<!-- Модальное окно для задания расписания -->
+<div id="schedule_modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
     <div class="bg-gray-800 p-6 rounded-lg w-80">
-      <h2 class="text-lg font-semibold mb-4">Задать расписание</h2>
-      <div class="mb-4">
-        <label for="on_time_input" class="block text-gray-300 mb-1">Время включения:</label>
-        <input id="on_time_input" type="time" class="w-full p-2 rounded bg-gray-700 text-white" />
-      </div>
-      <div class="mb-4">
-        <label for="off_time_input" class="block text-gray-300 mb-1">Время выключения:</label>
-        <input id="off_time_input" type="time" class="w-full p-2 rounded bg-gray-700 text-white" />
-      </div>
-      <div class="flex justify-end space-x-2">
-        <button id="cancel_schedule_btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Отмена</button>
-        <button id="save_schedule_btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Сохранить</button>
-      </div>
-      <div id="schedule_error" class="mt-2 text-sm text-red-400 hidden">Ошибка: неверное время</div>
+        <h2 class="text-lg font-semibold mb-4">Задать расписание</h2>
+        <div class="mb-4">
+            <label for="on_time_input" class="block text-gray-300 mb-1">Время включения:</label>
+            <input id="on_time_input" type="time" class="w-full p-2 rounded bg-gray-700 text-white"/>
+        </div>
+        <div class="mb-4">
+            <label for="off_time_input" class="block text-gray-300 mb-1">Время выключения:</label>
+            <input id="off_time_input" type="time" class="w-full p-2 rounded bg-gray-700 text-white"/>
+        </div>
+        <div class="flex justify-end space-x-2">
+            <button id="cancel_schedule_btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Отмена</button>
+            <button id="save_schedule_btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Сохранить</button>
+        </div>
+        <div id="schedule_error" class="mt-2 text-sm text-red-400 hidden">Ошибка: неверное время</div>
     </div>
-  </div>
+</div>
 
-  <script>
-    const baseUrl = "https://localhost:8000";
-    // Предполагаемый WebSocket URL (можно настроить на сервере при необходимости)
-    const wsUrl = "wss://localhost:8000/devices/1/ws";
+<script>
+    const baseUrl = "https://shiotstandard-production.up.railway.app";
+    const wsUrl = "wss://shiotstandard-production.up.railway.app/devices/ws/1/connect";
+    const wsToken = "abc123";
 
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -48,31 +48,26 @@
     document.getElementById("user_info").innerText = `Пользователь: ${user?.first_name || 'неизвестен'} (ID: ${user?.id || 'N/A'})`;
 
     const pins = [4, 5, 6, 15, 16, 17, 18, 21, 22, 23];
-    // Объект для хранения информации о каждом пине
     const pinsInfo = {};
-    let currentPinForSchedule = null;
+    let socket = null;
 
-    // Инициализируем данные по умолчанию
     pins.forEach(pin => {
-      pinsInfo[pin] = { state: null, mode: 'manual', schedule: { on: '08:00', off: '18:00' } };
+        pinsInfo[pin] = {state: null, mode: 'manual', schedule: {on: '08:00', off: '18:00'}};
     });
 
-    // Рендерим интерфейс
     function renderUI() {
-      const container = document.getElementById("pins_container");
-      container.innerHTML = '';
+        const container = document.getElementById("pins_container");
+        container.innerHTML = '';
 
-      pins.forEach(pin => {
-        const info = pinsInfo[pin];
-        const block = document.createElement("div");
-        block.className = "bg-gray-700 p-4 rounded space-y-2";
+        pins.forEach(pin => {
+            const info = pinsInfo[pin];
+            const block = document.createElement("div");
+            block.className = "bg-gray-700 p-4 rounded space-y-2";
 
-        // Состояние (ВКЛ/ВЫКЛ) или заглушка если не загружено
-        const statusText = info.state === 1 ? 'ВКЛ' : info.state === 0 ? 'ВЫКЛ' : '—';
-        const statusColor = info.state === 1 ? 'text-green-400' : info.state === 0 ? 'text-red-400' : 'text-gray-400';
+            const statusText = info.state === 1 ? 'ВКЛ' : info.state === 0 ? 'ВЫКЛ' : '—';
+            const statusColor = info.state === 1 ? 'text-green-400' : info.state === 0 ? 'text-red-400' : 'text-gray-400';
 
-        // Блок HTML с элементами без inline обработчиков
-        block.innerHTML = `
+            block.innerHTML = `
           <div class="flex justify-between items-center">
             <div class="text-lg">GPIO ${pin}</div>
             <select id="mode-select-${pin}" class="bg-gray-600 text-white px-2 py-1 rounded">
@@ -89,218 +84,155 @@
           <div class="text-sm text-gray-400">Режим: <span id="mode-label-${pin}">${info.mode === 'auto' ? 'Авто' : 'Ручной'}</span></div>
         `;
 
-        container.appendChild(block);
+            container.appendChild(block);
 
-        // После добавления блока привязываем события
-        const modeSelect = document.getElementById(`mode-select-${pin}`);
-        modeSelect.value = info.mode;
-        modeSelect.addEventListener('change', () => changeMode(pin, modeSelect.value));
+            const modeSelect = document.getElementById(`mode-select-${pin}`);
+            modeSelect.value = info.mode;
+            modeSelect.addEventListener('change', () => send({type: 'mode', pin, mode: modeSelect.value}));
 
-        const toggleBtn = document.getElementById(`toggle-btn-${pin}`);
-        const autoBtn = document.getElementById(`auto-btn-${pin}`);
-        const scheduleLabel = document.getElementById(`schedule-label-${pin}`);
+            const toggleBtn = document.getElementById(`toggle-btn-${pin}`);
+            const autoBtn = document.getElementById(`auto-btn-${pin}`);
+            const scheduleLabel = document.getElementById(`schedule-label-${pin}`);
 
-        if (info.mode === 'auto') {
-          // Авто: скрываем кнопку переключения, показываем метку расписания и кнопку "Ручной"
-          toggleBtn.disabled = true;
-          toggleBtn.classList.add('opacity-50', 'cursor-not-allowed');
-          autoBtn.innerText = 'Ручной';
-          scheduleLabel.classList.remove('hidden');
-          autoBtn.addEventListener('click', () => changeMode(pin, 'manual'));
+            if (info.mode === 'auto') {
+                toggleBtn.disabled = true;
+                toggleBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                autoBtn.innerText = 'Ручной';
+                scheduleLabel.classList.remove('hidden');
+                autoBtn.addEventListener('click', () => send({type: 'mode', pin, mode: 'manual'}));
+            } else {
+                toggleBtn.disabled = false;
+                toggleBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                toggleBtn.classList.toggle('bg-green-600', info.state !== 1);
+                toggleBtn.classList.toggle('hover:bg-green-700', info.state !== 1);
+                toggleBtn.classList.toggle('bg-red-600', info.state === 1);
+                toggleBtn.classList.toggle('hover:bg-red-700', info.state === 1);
+                toggleBtn.innerText = info.state === 1 ? 'ВЫКЛ' : 'ВКЛ';
+                toggleBtn.addEventListener('click', () => send({type: 'gpio', pin, state: info.state === 1 ? 0 : 1}));
+
+                autoBtn.innerText = 'АВТО';
+                scheduleLabel.classList.add('hidden');
+                autoBtn.addEventListener('click', () => openScheduleModal(pin));
+            }
+        });
+    }
+
+    function send(obj) {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(obj));
         } else {
-          // Ручной: кнопка переключения активна, авто-кнопка открывает модал
-          toggleBtn.disabled = false;
-          toggleBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          toggleBtn.classList.toggle('bg-green-600', info.state !== 1);
-          toggleBtn.classList.toggle('hover:bg-green-700', info.state !== 1);
-          toggleBtn.classList.toggle('bg-red-600', info.state === 1);
-          toggleBtn.classList.toggle('hover:bg-red-700', info.state === 1);
-          toggleBtn.innerText = info.state === 1 ? 'ВЫКЛ' : 'ВКЛ';
-          toggleBtn.addEventListener('click', () => togglePin(pin));
-
-          autoBtn.innerText = 'АВТО';
-          scheduleLabel.classList.add('hidden');
-          autoBtn.addEventListener('click', () => openScheduleModal(pin));
+            log('WebSocket не подключён', true);
         }
-      });
     }
 
-    // Функция загрузки полного статуса пинов
-    async function loadFullStatus() {
-      try {
-        const res = await fetch(`${baseUrl}/devices/1/full-status`);
-        const data = await res.json();
-        for (const [pinStr, info] of Object.entries(data.pins || {})) {
-          const pin = Number(pinStr);
-          if (!pinsInfo[pin]) continue;
-          pinsInfo[pin].state = info.state;
-          pinsInfo[pin].mode = info.mode;
-          if (info.schedule) {
-            pinsInfo[pin].schedule.on = info.schedule.on;
-            pinsInfo[pin].schedule.off = info.schedule.off;
-          }
-        }
-        renderUI();
-        log('Полный статус загружен');
-      } catch (err) {
-        log(`Ошибка загрузки статуса: ${err.message}`, true);
-      }
-    }
+    function setupWebSocket() {
+        socket = new WebSocket(wsUrl);
 
-    // Смена режима пина
-    async function changeMode(pin, mode) {
-      try {
-        await fetch(`${baseUrl}/devices/1/mode`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: pin, mode: mode })
+        socket.addEventListener('open', () => {
+            send({auth_token: wsToken, client: 'web'});
+            log('WebSocket подключён');
         });
-        pinsInfo[pin].mode = mode;
-        // Если переключаем в ручной, можно запросить текущее состояние сразу
-        if (mode === 'manual') {
-          // При ручном режиме оставляем текущее состояние
-        }
-        renderUI();
-        log(`Режим ${mode.toUpperCase()} установлен для GPIO ${pin}`);
-      } catch (err) {
-        log(`Ошибка смены режима: ${err.message}`, true);
-      }
-    }
 
-    // Переключение пина (вручную)
-    async function togglePin(pin) {
-      const info = pinsInfo[pin];
-      if (info.mode !== 'manual') {
-        log(`GPIO ${pin} в авто-режиме`, true);
-        return;
-      }
-      const newState = info.state === 1 ? 0 : 1;
-      log(`Команда: ${newState} → GPIO ${pin}`);
-      try {
-        const res = await fetch(`${baseUrl}/devices/1/gpio`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: pin, state: newState })
+        socket.addEventListener('message', event => {
+            try {
+                const data = JSON.parse(event.data);
+
+                // 📌 Сначала обрабатываем full_status
+                if (data.type === 'full_status') {
+                    for (const [pinStr, info] of Object.entries(data.pins || {})) {
+                        const pin = Number(pinStr);
+                        if (!pinsInfo[pin]) continue;
+                        pinsInfo[pin].state = info.state;
+                        pinsInfo[pin].mode = info.mode;
+                        if (info.schedule) {
+                            pinsInfo[pin].schedule.on = info.schedule.on;
+                            pinsInfo[pin].schedule.off = info.schedule.off;
+                        }
+                    }
+                    renderUI();
+                    return;
+                }
+
+                // 📌 Теперь можно обрабатывать отдельный пин
+                if ('pin' in data && pinsInfo[data.pin]) {
+                    const info = pinsInfo[data.pin];
+                    if ('state' in data) info.state = data.state;
+                    if ('mode' in data) info.mode = data.mode;
+                    if ('schedule' in data) {
+                        info.schedule.on = data.schedule.on;
+                        info.schedule.off = data.schedule.off;
+                    }
+                    renderUI();
+                    return;
+                }
+
+                // 📌 Лог информационного сообщения
+                if (data.type === 'info') {
+                    log(data.message);
+                    return;
+                }
+
+            } catch (err) {
+                log('Ошибка обработки WS сообщения: ' + err.message, true);
+            }
         });
-        const result = await res.json();
-        pinsInfo[pin].state = newState;
-        renderUI();
-        log(`Ответ сервера: ${JSON.stringify(result)}`);
-      } catch (err) {
-        log(`Ошибка при переключении: ${err.message}`, true);
-      }
+
+
+        socket.addEventListener('close', () => {
+            log('WS отключён. Переподключение через 5 сек.');
+            setTimeout(setupWebSocket, 5000);
+        });
+
+        socket.addEventListener('error', err => {
+            log('WS ошибка: ' + err.message, true);
+            socket.close();
+        });
     }
 
-    // Открыть модальное окно для задания расписания
     function openScheduleModal(pin) {
-      currentPinForSchedule = pin;
-      const { on, off } = pinsInfo[pin].schedule;
-      document.getElementById('on_time_input').value = on;
-      document.getElementById('off_time_input').value = off;
-      document.getElementById('schedule_error').classList.add('hidden');
-      document.getElementById('schedule_modal').classList.remove('hidden');
+        currentPinForSchedule = pin;
+        document.getElementById('on_time_input').value = pinsInfo[pin].schedule.on;
+        document.getElementById('off_time_input').value = pinsInfo[pin].schedule.off;
+        document.getElementById('schedule_error').classList.add('hidden');
+        document.getElementById('schedule_modal').classList.remove('hidden');
     }
 
-    // Закрыть модальное окно (без сохранения)
     function closeScheduleModal() {
-      currentPinForSchedule = null;
-      document.getElementById('schedule_modal').classList.add('hidden');
+        currentPinForSchedule = null;
+        document.getElementById('schedule_modal').classList.add('hidden');
     }
 
-    // Сохранить расписание из модального окна
     async function saveSchedule() {
-      const onTime = document.getElementById('on_time_input').value;
-      const offTime = document.getElementById('off_time_input').value;
-      if (!onTime || !offTime || onTime >= offTime) {
-        document.getElementById('schedule_error').innerText = 'Время включения должно быть раньше времени выключения';
-        document.getElementById('schedule_error').classList.remove('hidden');
-        return;
-      }
-      const pin = currentPinForSchedule;
-      try {
-        // Сначала задаём само расписание
-        const res1 = await fetch(`${baseUrl}/devices/1/schedule`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: pin, on_time: onTime, off_time: offTime })
-        });
-        await res1.json();
-        // Затем сразу выключаем пин (state=0)
-        const res2 = await fetch(`${baseUrl}/devices/1/gpio`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pin: pin, state: 0 })
-        });
-        await res2.json();
-
+        const onTime = document.getElementById('on_time_input').value;
+        const offTime = document.getElementById('off_time_input').value;
+        if (!onTime || !offTime || onTime >= offTime) {
+            document.getElementById('schedule_error').innerText = 'Время включения должно быть раньше выключения';
+            document.getElementById('schedule_error').classList.remove('hidden');
+            return;
+        }
+        const pin = currentPinForSchedule;
+        send({type: 'schedule', pin, on_time: onTime, off_time: offTime});
+        pinsInfo[pin].schedule = {on: onTime, off: offTime};
         pinsInfo[pin].mode = 'auto';
         pinsInfo[pin].state = 0;
-        pinsInfo[pin].schedule.on = onTime;
-        pinsInfo[pin].schedule.off = offTime;
         renderUI();
-        log(`Расписание для GPIO ${pin}: ${onTime}–${offTime}`);
-      } catch (err) {
-        log(`Ошибка задания авто-режима: ${err.message}`, true);
-      } finally {
         closeScheduleModal();
-      }
+        log(`Задано расписание GPIO ${pin}: ${onTime}–${offTime}`);
     }
 
-    // Обработчики кнопок модального окна
     document.getElementById('cancel_schedule_btn').addEventListener('click', closeScheduleModal);
     document.getElementById('save_schedule_btn').addEventListener('click', saveSchedule);
 
-    // Функция для вывода лога
-    function log(message, isError=false) {
-      const logEl = document.getElementById('log');
-      logEl.innerText = `Лог: ${message}`;
-      logEl.classList.toggle('text-red-400', isError);
-      logEl.classList.toggle('text-gray-300', !isError);
+    function log(message, isError = false) {
+        const el = document.getElementById('log');
+        el.innerText = `Лог: ${message}`;
+        el.classList.toggle('text-red-400', isError);
+        el.classList.toggle('text-gray-300', !isError);
     }
 
-    // Подключение к WebSocket для получения обновлений в реальном времени
-    function setupWebSocket() {
-      try {
-        const socket = new WebSocket(wsUrl);
-        socket.addEventListener('open', () => {
-          console.log('WebSocket подключён');
-        });
-        socket.addEventListener('message', event => {
-          try {
-            const data = JSON.parse(event.data);
-            // Ожидаем, что сервер шлёт объект вида { pin: 4, state: 1, mode: 'auto', schedule: { on: '08:00', off: '18:00' } }
-            const { pin, state, mode, schedule } = data;
-            if (pinsInfo[pin]) {
-              pinsInfo[pin].state = state;
-              pinsInfo[pin].mode = mode;
-              if (schedule) {
-                pinsInfo[pin].schedule.on = schedule.on;
-                pinsInfo[pin].schedule.off = schedule.off;
-              }
-              renderUI();
-            }
-          } catch (e) {
-            console.error('Ошибка обработки сообщения WS:', e);
-          }
-        });
-        socket.addEventListener('close', () => {
-          console.log('WebSocket отключён, попытка переподключения через 5 сек.');
-          setTimeout(setupWebSocket, 5000);
-        });
-        socket.addEventListener('error', err => {
-          console.error('WebSocket ошибка:', err);
-          socket.close();
-        });
-      } catch (e) {
-        console.error('Не удалось инициализировать WebSocket:', e);
-      }
-    }
-
-    // Запускаем всё при загрузке DOM
     document.addEventListener('DOMContentLoaded', () => {
-      loadFullStatus();
-      setupWebSocket();
+        setupWebSocket();
     });
-  </script>
+</script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 from typing import Literal
-from config.config import const_pins
+from app.config.config import const_pins
 from pydantic import BaseModel, field_validator
 
 

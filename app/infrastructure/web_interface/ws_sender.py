@@ -1,5 +1,5 @@
-from domain.devices.interfaces import IWebSender
-from infrastructure.web_interface.ws_manager import web_ws_manager
+from app.domain.devices.interfaces import IWebSender
+from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 
 class WebSocketWebSender(IWebSender):

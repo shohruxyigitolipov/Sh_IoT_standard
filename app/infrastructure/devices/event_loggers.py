@@ -1,5 +1,5 @@
 from app.config.config import event_bus
-from infrastructure.logger_module.utils import get_logger_factory
+from app.infrastructure.logger_module.utils import get_logger_factory
 
 get_logger = get_logger_factory('device')
 logger = get_logger()

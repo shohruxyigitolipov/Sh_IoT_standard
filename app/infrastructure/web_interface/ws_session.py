@@ -4,7 +4,7 @@ from fastapi import status
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
 from app.config.config import event_bus
-from infrastructure.web_interface.ws_manager import web_ws_manager
+from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 
 async def verify_auth_token(token):
