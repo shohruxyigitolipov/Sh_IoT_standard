@@ -1,33 +1,24 @@
+from typing import Literal
+from config.config import const_pins
 from pydantic import BaseModel, field_validator
 
 
 class PinStateMessage(BaseModel):
     action: str
     pin: int
-    state: int
-
-    @field_validator('state')
-    def check_state(cls, v):
-        if v not in (0, 1):
-            raise ValueError('state must be 1 or 0')
-        return v
+    state: Literal[1, 0]
 
 
 class SetState(BaseModel):
     action: str = 'set_state'
-    pin: int
-    state: int
+    pin: Literal[4, 5, 16, 17, 18, 21, 22, 23]
+    state: Literal[1, 0]
 
 
 class SetMode(BaseModel):
     action: str = 'set_mode'
     pin: int
-    mode: str
-
-    @field_validator('mode')
-    def check_mode(cls, v):
-        if v not in ('manual', 'auto'):
-            raise ValueError("mode must be: 'manual' or 'auto'")
+    mode: Literal["manual", "auto"]
 
 
 class SetSchedule(BaseModel):

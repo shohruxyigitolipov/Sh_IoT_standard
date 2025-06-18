@@ -6,7 +6,7 @@ device_service = get_device_service()
 
 # web
 @event_bus.on('web_ws_connected')
-async def handle_connection(websocket):
+async def handle_connection(device_id, websocket):
     await websocket.send_text('Вы подключились')
 
 

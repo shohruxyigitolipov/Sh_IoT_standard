@@ -1,9 +1,10 @@
 from fastapi import APIRouter, WebSocket
 
-from infrastructure.logger_module import api_logger
+from infrastructure.logger_module.utils import get_logger_factory
 from infrastructure.web_interface.ws_session import web_ws_session
 
-logger = api_logger
+get_logger = get_logger_factory(__name__)
+logger = get_logger()
 
 router = APIRouter(prefix='/interfaces/web')
 

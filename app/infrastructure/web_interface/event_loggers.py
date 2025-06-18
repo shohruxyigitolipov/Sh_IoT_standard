@@ -1,3 +1,26 @@
-from infrastructure.logger_module import web_logger
+from config.config import event_bus
+from infrastructure.logger_module.utils import get_logger_factory
 
-loger = web_logger
+get_logger = get_logger_factory('Web Interface')
+logger = get_logger()
+
+
+# web
+@event_bus.on('web_ws_connected')
+async def handle_connection(device_id, websocket):
+    logger.info(f'{[device_id]} Веб-интерфейс подключен')
+
+
+@event_bus.on('web_ws_timeout')
+async def handle_timeout(websocket):
+    pass
+
+
+@event_bus.on('web_ws_wrong_auth_token')
+async def handle_web_wrong_auth_token(websocket):
+    pass
+
+
+@event_bus.on('message_from_web_ws')
+async def handle_message_from_device(device_id, message):
+    print(f'[{device_id}] message from web: {message}')

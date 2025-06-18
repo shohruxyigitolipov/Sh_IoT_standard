@@ -1,16 +1,17 @@
 from app.config.config import event_bus
-from infrastructure.logger_module import device_logger
+from infrastructure.logger_module.utils import get_logger_factory
 
+get_logger = get_logger_factory('device')
+logger = get_logger()
 
-logger = device_logger
 
 @event_bus.on('new_device')
 async def handle_new_device(device_id):
     logger.debug(f'Новое устройство: {device_id}')
 
-@event_bus.on("device_connected")
-async def handle_connect(device_id):
-    logger.debug(f'✅ Устройство {device_id} подключено.')
+@event_bus.on("device_ws_connected")
+async def handle_connect(device_id, websocket):
+    logger.info(f'✅ Устройство {device_id} подключено.')
 
 
 @event_bus.on("device_disconnected")

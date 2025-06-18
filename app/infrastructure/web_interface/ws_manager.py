@@ -1,10 +1,12 @@
-from config.config import event_bus
-from fastapi import WebSocket
 import json
-import asyncio
-from infrastructure.logger_module import api_logger
 
-logger = api_logger
+from fastapi import WebSocket
+
+from config.config import event_bus
+from infrastructure.logger_module.utils import get_logger_factory
+
+get_logger = get_logger_factory(__name__)
+logger = get_logger()
 
 
 class WebClientWebSocketManager:

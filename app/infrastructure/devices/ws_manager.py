@@ -3,9 +3,10 @@ import json
 import asyncio
 
 from config.config import event_bus
-from infrastructure.logger_module import api_logger
+from infrastructure.logger_module.utils import get_logger_factory
 
-logger = api_logger
+get_logger = get_logger_factory(__name__)
+logger = get_logger()
 
 
 class DeviceWebSocketManager:
