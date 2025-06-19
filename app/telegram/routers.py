@@ -4,7 +4,7 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, W
 
 user_rt = Router(name='users')
 
-url = f"wss://shiotstandard-production.up.railway.app"
+url = f"https://shiotstandard-production.up.railway.app"
 
 
 def main_kb() -> InlineKeyboardMarkup:
