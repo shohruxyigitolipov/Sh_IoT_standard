@@ -34,8 +34,7 @@ class WebClientWebSocketManager:
         print(f'active: {self.active.get(device_id)}')
         if ws:
             if isinstance(data, dict):
-                data = json.dumps(data, ensure_ascii=False)
-                await ws.send_json(data=data)
+                await ws.send_json(data)
             else:
                 await ws.send_text(data)
         else:

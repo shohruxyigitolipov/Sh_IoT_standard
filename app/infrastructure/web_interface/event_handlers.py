@@ -2,15 +2,14 @@ import json
 
 from app.config.config import event_bus
 from app.config.container import get_device_service
-from config.config import const_pins
-from infrastructure.web_interface.ws_manager import web_ws_manager
+from app.config.config import const_pins
+from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 device_service = get_device_service()
 
 
 @event_bus.on('message_from_web_ws')
 async def handle_message_from_device(device_id, message):
-    # message = json.loads
     action = message['action']
     if action == 'set_state':
         await device_service.set_state(device_id, pin=message['pin'], state=message['state'])
