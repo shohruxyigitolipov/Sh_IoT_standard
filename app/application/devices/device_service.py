@@ -45,10 +45,6 @@ class DeviceService:
         data = SetMode(pin=pin, mode='manual')
         await self.sender.send(device_id=device_id, data=data.model_dump())
 
-    async def get_state(self, pin: int):
-        state = await self.state.get_state(pin=pin)
-        return state
-
-    async def get_mode(self, pin: int):
-        mode = await self.state.get_mode(pin)
-        return mode
+    async def request_report(self, device_id: int, pin: int = None):
+        data = {'action': 'report', 'pin': pin}
+        await self.sender.send(device_id=device_id, data=data)
