@@ -1,3 +1,4 @@
+from fastapi import WebSocket
 from app.config.config import event_bus
 from app.infrastructure.logger_module.utils import get_logger_factory
 
@@ -7,8 +8,8 @@ logger = get_logger()
 
 # web
 @event_bus.on('web_ws_connected')
-async def handle_connection(device_id, websocket):
-    await websocket.send_text('Вы подключились')
+async def handle_connection(device_id, websocket: WebSocket):
+    await websocket.send_text('{"message": "Вы подключились"}')
 
 
 @event_bus.on('web_ws_timeout')
