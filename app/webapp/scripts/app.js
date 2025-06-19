@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const log = document.getElementById("log");
   const status = document.getElementById("connection_status");
 
-  const wsClient = new ReconnectingWebSocketWrapper("ws://localhost:8000/interfaces/web/ws/1/connect");
+  const wsClient = new ReconnectingWebSocketWrapper("wss://shiotstandard-production.up.railway.app/interfaces/web/ws/1/connect");
 
   wsClient.onOpen = (ws) => {
     status.innerText = "✅ Подключено к серверу";
