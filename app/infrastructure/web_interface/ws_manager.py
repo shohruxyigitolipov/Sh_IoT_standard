@@ -31,7 +31,6 @@ class WebClientWebSocketManager:
 
     async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
         ws = self.active.get(device_id)
-        print(f'active: {self.active.get(device_id)}')
         if ws:
             if isinstance(data, dict):
                 await ws.send_json(data)

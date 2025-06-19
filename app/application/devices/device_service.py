@@ -36,6 +36,13 @@ class DeviceService:
             await self.state.set_state(data=data)
             await self.sender_web.send(device_id=device_id, data=data.model_dump())
 
+    async def set_mode(self, device_id: int, pin, mode: Literal['auto', 'manual']):
+        data = SetMode(pin=pin, mode=mode)
+        response = await self.sender.send(device_id=device_id, data=data.model_dump())
+        if self._is_success(response):
+            await self.state.set_mode(data=data)
+            await self.sender_web.send(device_id=device_id, data=data.model_dump())
+
     async def set_schedule(self, device_id: int, pin: int, on_time: str, off_time: str):
         data = SetSchedule(pin=pin, on_time=on_time, off_time=off_time)
         response = await self.sender.send(device_id=device_id, data=data.model_dump())
