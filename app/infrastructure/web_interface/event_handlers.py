@@ -11,7 +11,10 @@ device_service = get_device_service()
 @event_bus.on('message_from_web_ws')
 async def handle_message_from_device(device_id, message):
     # message = json.loads
-    action = message['action']
+    action = message.get('action')
+    if not action:
+        return
+
     if action == 'set_state':
         await device_service.set_state(device_id, pin=message['pin'], state=message['state'])
     if action == 'get_pins':
