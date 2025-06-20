@@ -1,5 +1,4 @@
 // renderer.js
-
 import {changeDeviceStatus} from "./utils.js";
 
 export function renderPin(pin, ws) {
@@ -39,7 +38,7 @@ export function renderPin(pin, ws) {
   topRow.appendChild(leftGroup);
 
 
-if (pin.mode === "manual" || pin.mode === "auto") {
+  if (pin.mode === "manual" || pin.mode === "auto") {
     const toggleWrapper = document.createElement("label");
     toggleWrapper.className = "relative inline-flex items-center cursor-pointer";
 
@@ -47,9 +46,8 @@ if (pin.mode === "manual" || pin.mode === "auto") {
     input.type = "checkbox";
     input.checked = !!pin.state;
     input.className = "sr-only peer";
-    if (pin.mode === "auto") input.disabled = true;
-
     const toggleDiv = document.createElement("div");
+
     toggleDiv.className = "w-11 h-6 rounded-full peer bg-red-600 peer-checked:bg-green-600 peer-focus:ring-4 transition-all";
     toggleDiv.classList.add("after:content-['']",
                              "after:absolute", "after:top-[2px]",
@@ -60,6 +58,10 @@ if (pin.mode === "manual" || pin.mode === "auto") {
                              "after:transition-all",
                              "peer-checked:after:translate-x-full",
                              "peer-checked:after:border-white");
+    if (pin.mode === "auto") {
+        input.disabled = true;
+        toggleDiv.classList.add("opacity-50", "pointer-events-none");
+    }
 
     input.onchange = () => {
         if (pin.mode === "manual") {

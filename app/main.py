@@ -34,17 +34,11 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.mount("/static", StaticFiles(directory="app/webapp"), name="static")
+app.mount("/static", StaticFiles(directory="app/telegram/webapp"), name="static")
 app.include_router(device_rt)
 app.include_router(web_interface_rt)
-templates = Jinja2Templates(directory="app/templates")
-templates2 = Jinja2Templates(directory='app/webapp')
+templates = Jinja2Templates(directory='app/telegram/webapp')
 
 @app.get('/', response_class=HTMLResponse)
 async def welcome(request: Request):
-    return templates2.TemplateResponse('index.html', {'request': request})
-
-
-@app.get('/test', response_class=HTMLResponse)
-async def test(request: Request):
-    return templates.TemplateResponse('gpio_control_panel_v2.html', {'request': request})
+    return templates.TemplateResponse('index.html', {'request': request})
