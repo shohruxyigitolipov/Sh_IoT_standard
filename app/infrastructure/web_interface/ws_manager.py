@@ -19,19 +19,15 @@ class WebClientWebSocketManager:
     async def remove(self, device_id: int):
         try:
             await self.active.pop(device_id, None).close()
-        except Exception as e:
-            logger.error(e)
-
-    async def get(self, device_id) -> WebSocket | None:
-        return self.active.get(device_id)
+        except:
+            pass
 
     async def send_personal(self, device_id: int, data: str | dict):
         ws = self.active.get(device_id)
         if ws:
             if isinstance(data, dict):
-                await ws.send_json(data)
-            else:
-                await ws.send_text(data)
+                data = json.dumps(data, ensure_ascii=False)
+            await ws.send_json(data)
         else:
             event_bus.emit('message_failed', device_id, data)
 

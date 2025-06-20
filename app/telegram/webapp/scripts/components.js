@@ -1,3 +1,5 @@
+import {wsSender} from "./websocket.js";
+
 export function createModeSelect(pin, ws) {
   const modeSelect = document.createElement("select");
   modeSelect.className = "bg-gray-800 text-white p-1 rounded";
@@ -11,11 +13,7 @@ export function createModeSelect(pin, ws) {
   });
 
   modeSelect.onchange = () => {
-    ws.send(JSON.stringify({
-      action: "set_mode",
-      pin: pin.pin,
-      mode: modeSelect.value
-    }));
+    wsSender.set_mode(pin.pin, modeSelect.value);
   };
 
   return modeSelect;
@@ -45,13 +43,7 @@ export function createToggle(pin, ws) {
   }
 
   input.onchange = () => {
-    if (pin.mode === "manual") {
-      ws.send(JSON.stringify({
-        action: "set_state",
-        pin: pin.pin,
-        state: input.checked ? 1 : 0
-      }));
-    }
+    if (pin.mode === "manual") wsSender.set_state(pin.pin, input.checked ? 1 : 0);
   };
 
   toggleWrapper.append(input, toggleDiv);
@@ -76,14 +68,7 @@ export function createTimeRow(pin, ws) {
 
   const sendSchedule = () => {
     if (fromInput.value && toInput.value) {
-      ws.send(JSON.stringify({
-        action: "set_schedule",
-        pin: pin.pin,
-        schedule: {
-          on_time: fromInput.value,
-          off_time: toInput.value
-        }
-      }));
+      wsSender.set_schedule(pin.pin, fromInput.value, toInput.value);
     }
   };
 

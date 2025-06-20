@@ -11,7 +11,13 @@ logger = get_logger()
 # web
 @event_bus.on('web_ws_connected')
 async def handle_connection(device_id, ws: WebSocket):
+    logger.info(f'{[device_id]} Веб-интерфейс подключен')
     await ws.send_json(json.dumps({'message': 'Вы подключились'}))
+
+
+@event_bus.on('web_ws_disconnected')
+async def handle_connection(device_id):
+    logger.info(f'{[device_id]} Веб-интерфейс отключен')
 
 
 @event_bus.on('web_ws_timeout')
@@ -22,12 +28,6 @@ async def handle_timeout(ws: WebSocket):
 @event_bus.on('web_ws_wrong_auth_token')
 async def handle_web_wrong_auth_token(ws: WebSocket):
     await ws.send_json(json.dumps({'message': 'Неверный auth_token'}))  # сообщение устройству
-
-
-# web
-@event_bus.on('web_ws_connected')
-async def handle_connection(device_id, ws: WebSocket):
-    logger.info(f'{[device_id]} Веб-интерфейс подключен')
 
 
 @event_bus.on('web_ws_timeout')

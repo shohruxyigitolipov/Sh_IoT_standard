@@ -43,3 +43,55 @@ export class WebSocketWrapper {
     }
   }
 }
+
+export class WebSocketSender {
+  constructor(ws) {
+    this.ws = ws;
+  }
+
+  authenticate(auth_token) {
+    this._send({
+      auth_token: auth_token
+    })
+  }
+
+  get_report() {
+    this._send({
+      action: 'get_report'
+    })
+  }
+
+  set_mode(pin, mode) {
+    this._send({
+      action: "set_mode",
+      pin: pin,
+      mode: mode
+    })
+  }
+
+  set_state(pin, state) {
+    this._send({
+      action: "set_state",
+      pin: pin,
+      state: state
+    })
+  }
+
+  set_schedule(pin, on_time, off_time) {
+      this._send({
+          action: "set_schedule",
+          pin: pin,
+          schedule: {
+              on_time: on_time,
+              off_time: off_time
+          }
+      })
+  }
+
+  _send(data) {
+    this.ws.send(JSON.stringify(data))
+  }
+}
+
+export const wsClient = new WebSocketWrapper("ws://localhost:8000/interfaces/web/ws/1/connect");
+export const wsSender = new WebSocketSender(wsClient.ws);

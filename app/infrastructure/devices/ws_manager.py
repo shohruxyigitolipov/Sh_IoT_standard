@@ -21,18 +21,16 @@ class DeviceWebSocketManager:
         try:
             await self.active.pop(device_id, None).close()
         except Exception as e:
-            logger.error(e)
+            pass
         event_bus.emit('device_status', device_id, False)
 
     async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
-        try:
-            ws = self.active[device_id]
+        ws = self.active.get(device_id)
+        if ws:
             if isinstance(data, dict):
-                data = json.dumps(data, ensure_ascii=False)
+                data = json.dumps(data)
             await ws.send_json(data)
-        except Exception as e:
+        else:
             event_bus.emit('message_failed', device_id, data)
-            logger.error(e)
-
 
 device_ws_manager = DeviceWebSocketManager()

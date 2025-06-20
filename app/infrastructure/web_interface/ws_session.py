@@ -38,12 +38,10 @@ class WebClientWebSocketSession:
     async def _listen(websocket: WebSocket, device_id: int):
         try:
             while True:
-                msg = await websocket.receive_json()
-                event_bus.emit('message_from_web_ws', device_id, msg)
+                data = await websocket.receive_json()
+                event_bus.emit('message_from_web_ws', device_id, data)
         except WebSocketDisconnect:
-            event_bus.emit('web_ws_disconnected')
-
-            raise
+            event_bus.emit('web_ws_disconnected', device_id)
 
 
 web_ws_session = WebClientWebSocketSession()
