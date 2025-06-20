@@ -10,6 +10,7 @@ logger = get_logger()
 async def handle_new_device(device_id):
     logger.debug(f'Новое устройство: {device_id}')
 
+
 @event_bus.on("device_ws_connected")
 async def handle_connect(device_id, websocket):
     logger.info(f'✅ Устройство {device_id} подключено.')
@@ -28,11 +29,6 @@ async def handle_message(device_id, message):
 @event_bus.on('message_to_device')
 async def handle_message_to_device(device_id, message):
     logger.debug(f'{device_id} Отправлено сообщение: {message}')
-
-
-@event_bus.on('device_timeout')
-async def handle_timeout(device_id, last_pong_time):
-    logger.info(f"")
 
 
 @event_bus.on('device_send_error')
@@ -58,6 +54,4 @@ async def handle_auth_token_wrong(device_id):
 @event_bus.on('message_failed')
 async def handle_message_failed(device_id, message):
     logger.debug(f"[{device_id}], Сообщение: {message} возможно не дошло")
-    raise RuntimeError(f'Websocket for device {device_id} not found')
-
-
+    # raise RuntimeError(f'Websocket for device {device_id} not found')
