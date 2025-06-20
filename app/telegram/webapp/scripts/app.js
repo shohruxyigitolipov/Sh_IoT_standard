@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const data = JSON.parse(event.data);
       console.log("Received data:", data);
-
       if (data.type === "report") {
         renderPins(data, ws);
       } else if (data.type === "device_status") {

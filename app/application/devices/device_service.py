@@ -1,12 +1,12 @@
+
 from typing import Literal
 
 from app.application.devices.commands import SetState, SetMode, SetSchedule
-from app.domain.devices.interfaces import IDeviceSender, IDeviceStateManager
-from app.infrastructure.web_interface.ws_sender import WebSocketWebSender
+from app.domain.devices.interfaces import IDeviceSender, IDeviceStateManager, IWebSender
 
 
 class DeviceService:
-    def __init__(self, sender: IDeviceSender, sender_web: WebSocketWebSender, state_manager: IDeviceStateManager):
+    def __init__(self, sender: IDeviceSender, sender_web: IWebSender, state_manager: IDeviceStateManager):
         self.sender = sender
         self.sender_web = sender_web
         self.state = state_manager
