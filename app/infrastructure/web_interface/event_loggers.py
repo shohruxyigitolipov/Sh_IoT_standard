@@ -1,3 +1,5 @@
+import json
+
 from fastapi import WebSocket
 from app.config.config import event_bus
 from app.infrastructure.logger_module.utils import get_logger_factory
@@ -8,33 +10,33 @@ logger = get_logger()
 
 # web
 @event_bus.on('web_ws_connected')
-async def handle_connection(device_id, websocket: WebSocket):
-    await websocket.send_text('{"message": "Вы подключились"}')
+async def handle_connection(device_id, ws: WebSocket):
+    await ws.send_json(json.dumps({'message': 'Вы подключились'}))
 
 
 @event_bus.on('web_ws_timeout')
-async def handle_timeout(websocket):
-    await websocket.send_text('Время ожидания истекло!')
+async def handle_timeout(ws: WebSocket):
+    await ws.send_json(json.dumps({'message': 'Время ожидания истекло!'}))
 
 
 @event_bus.on('web_ws_wrong_auth_token')
-async def handle_web_wrong_auth_token(websocket):
-    await websocket.send_text('Неверный auth_token')  # сообщение устройству
+async def handle_web_wrong_auth_token(ws: WebSocket):
+    await ws.send_json(json.dumps({'message': 'Неверный auth_token'}))  # сообщение устройству
 
 
 # web
 @event_bus.on('web_ws_connected')
-async def handle_connection(device_id, websocket):
+async def handle_connection(device_id, ws: WebSocket):
     logger.info(f'{[device_id]} Веб-интерфейс подключен')
 
 
 @event_bus.on('web_ws_timeout')
-async def handle_timeout(websocket):
+async def handle_timeout(ws: WebSocket):
     pass
 
 
 @event_bus.on('web_ws_wrong_auth_token')
-async def handle_web_wrong_auth_token(websocket):
+async def handle_web_wrong_auth_token(ws: WebSocket):
     pass
 
 

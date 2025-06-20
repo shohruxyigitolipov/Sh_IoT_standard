@@ -45,10 +45,7 @@ class DeviceWebSocketSession:
         try:
             while True:
                 msg = await websocket.receive_text()
-                if 'ping' in msg:
-                    event_bus.emit('device_ws_ping', device_id)
-                else:
-                    event_bus.emit('message_from_device_ws', device_id, msg)
+                event_bus.emit('message_from_device', device_id, msg)
         except WebSocketDisconnect:
             event_bus.emit('device_ws_disconnected', device_id)
             await device_ws_manager.remove(device_id)

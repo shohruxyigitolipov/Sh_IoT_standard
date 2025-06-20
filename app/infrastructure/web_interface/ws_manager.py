@@ -12,24 +12,20 @@ logger = get_logger()
 class WebClientWebSocketManager:
     def __init__(self):
         self.active: dict[int, WebSocket] = {}
-        self.pending = {}
 
     async def add(self, device_id: int, ws: WebSocket):
         self.active[device_id] = ws
 
-    async def remove(self, device_id: int) -> bool:
+    async def remove(self, device_id: int):
         try:
-            self.active.pop(device_id, None)
-            await self.active[device_id].close()
+            await self.active.pop(device_id, None).close()
         except Exception as e:
             logger.error(e)
-            return False
-        return True
 
     async def get(self, device_id) -> WebSocket | None:
         return self.active.get(device_id)
 
-    async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
+    async def send_personal(self, device_id: int, data: str | dict):
         ws = self.active.get(device_id)
         if ws:
             if isinstance(data, dict):

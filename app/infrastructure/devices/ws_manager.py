@@ -17,14 +17,12 @@ class DeviceWebSocketManager:
         self.active[device_id] = ws
         event_bus.emit('device_status', device_id, True)
 
-    async def remove(self, device_id: int) -> bool:
-        event_bus.emit('device_status', device_id, False)
+    async def remove(self, device_id: int):
         try:
-            self.active.pop(device_id, None)
+            await self.active.pop(device_id, None).close()
         except Exception as e:
             logger.error(e)
-            return False
-        return True
+        event_bus.emit('device_status', device_id, False)
 
     async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
         try:

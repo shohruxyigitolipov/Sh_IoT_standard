@@ -6,19 +6,9 @@ get_logger = get_logger_factory('device')
 logger = get_logger()
 
 
-@event_bus.on('new_device')
-async def handle_new_device(device_id):
-    logger.debug(f'Новое устройство: {device_id}')
-
-
 @event_bus.on("device_ws_connected")
 async def handle_connect(device_id, websocket):
     logger.info(f'✅ Устройство {device_id} подключено.')
-
-
-@event_bus.on("device_disconnected")
-async def handle_disconnect(device_id):
-    logger.debug(f"[{device_id}] Сессия завершена и удалена.❌")
 
 
 @event_bus.on("message_from_device")
