@@ -40,6 +40,7 @@ export function renderPin(pin, ws) {
   topRow.appendChild(leftGroup);
 
   
+  
   if (pin.mode === "manual") {
     const button = document.createElement("button");
     button.innerText = pin.state ? "ВЫКЛ" : "ВКЛ";
@@ -57,14 +58,20 @@ export function renderPin(pin, ws) {
       }));
     };
     topRow.appendChild(button);
+  } else if (pin.mode === "auto") {
+    const statusSpan = document.createElement("span");
+    statusSpan.title = "Текущее состояние пина";
+    statusSpan.className = pin.state
+      ? "bg-green-600 px-4 py-1 rounded text-white font-bold"
+      : "bg-red-600 px-4 py-1 rounded text-white font-bold";
+    topRow.appendChild(statusSpan);
   }
-
   newDiv.appendChild(topRow);
 
   
   if (pin.mode === "auto") {
     const timeRow = document.createElement("div");
-    timeRow.className = "flex justify-end items-center mt-2 gap-2 text-sm text-white";
+    timeRow.className = "flex justify-center items-center mt-2 gap-2 text-sm text-white";
 
     const fromInput = document.createElement("input");
     fromInput.type = "time";
@@ -98,7 +105,13 @@ export function renderPin(pin, ws) {
     toInput.onchange = sendSchedule;
 
     timeRow.append(fromInput, separator, toInput);
-    newDiv.appendChild(timeRow);
+    
+    const statusLabel = document.createElement("span");
+    statusLabel.innerText = pin.state ? "ВКЛЮЧЕН" : "ВЫКЛЮЧЕН";
+    statusLabel.className = pin.state
+        ? "text-green-400 font-bold"
+        : "text-red-400 font-bold";
+newDiv.appendChild(timeRow);
   }
 
   const existing = document.getElementById(newDiv.id);
