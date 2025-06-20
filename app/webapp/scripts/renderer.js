@@ -1,7 +1,6 @@
-
 // renderer.js
 
-import {changeDeviceStatus} from "./utils";
+import {changeDeviceStatus} from "./utils.js";
 
 export function renderPin(pin, ws) {
   const container = document.getElementById("pins_container");
