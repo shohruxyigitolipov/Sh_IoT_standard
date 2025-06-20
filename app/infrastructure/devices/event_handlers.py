@@ -3,6 +3,8 @@ import json
 from fastapi import WebSocket
 
 from app.config.config import event_bus
+from app.infrastructure.devices.in_memory_state import device_state
+from app.infrastructure.web_interface.event_handlers import device_service
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 
@@ -25,8 +27,16 @@ async def handle_device_wrong_auth_token(ws: WebSocket):
 async def handle_message_from_device(device_id: int, message: str):
     message = json.loads(message)
     message_type = message.get('type')
+
     if message_type == 'report':
-        await web_ws_manager.send_personal(device_id, message)
+        for pin in message.get('pin_list'):
+            schedule = pin.get('schedule')
+            await device_state.set_state(pin=pin.get('pin'), state=pin.get('state'))
+            await device_state.set_mode(pin=pin.get('pin'), mode=pin.get('mode'))
+            await device_state.set_schedule(pin=pin.get('pin'), on_time=schedule.get('on_time'),
+                                            off_time=schedule.get('off_time'))
+
+        await web_ws_manager.send_personal(device_id, data=message)
 
 
 @event_bus.on('device_status')

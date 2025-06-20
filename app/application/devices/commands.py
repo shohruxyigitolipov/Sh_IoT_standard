@@ -1,6 +1,6 @@
 from typing import Literal
-from app.config.config import const_pins
-from pydantic import BaseModel, field_validator
+
+from pydantic import BaseModel
 
 
 class PinStateMessage(BaseModel):

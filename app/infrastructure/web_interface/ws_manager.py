@@ -1,5 +1,3 @@
-import json
-
 from fastapi import WebSocket
 
 from app.config.config import event_bus
