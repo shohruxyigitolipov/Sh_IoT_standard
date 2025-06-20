@@ -39,33 +39,44 @@ export function renderPin(pin, ws) {
   leftGroup.append(label, modeSelect);
   topRow.appendChild(leftGroup);
 
-  
-  
-  if (pin.mode === "manual") {
-    const button = document.createElement("button");
-    button.innerText = pin.state ? "ВЫКЛ" : "ВКЛ";
-    button.title = "Переключить состояние пина вручную";
-    button.className = (pin.state
-      ? "bg-red-600 hover:bg-red-500"
-      : "bg-green-600 hover:bg-green-500") + " px-4 py-1 rounded transition-colors";
-    button.id = "GPIO" + pin.pin;
-    button.onclick = () => {
-      const state = button.innerText === "ВКЛ" ? 1 : 0;
-      ws.send(JSON.stringify({
-        action: "set_state",
-        pin: pin.pin,
-        state
-      }));
+
+if (pin.mode === "manual" || pin.mode === "auto") {
+    const toggleWrapper = document.createElement("label");
+    toggleWrapper.className = "relative inline-flex items-center cursor-pointer";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = !!pin.state;
+    input.className = "sr-only peer";
+    if (pin.mode === "auto") input.disabled = true;
+
+    const toggleDiv = document.createElement("div");
+    toggleDiv.className = "w-11 h-6 rounded-full peer bg-red-600 peer-checked:bg-green-600 peer-focus:ring-4 transition-all";
+    toggleDiv.classList.add("after:content-['']",
+                             "after:absolute", "after:top-[2px]",
+                             "after:left-[2px]",
+                             "after:bg-white",
+                             "after:border", "after:rounded-full",
+                             "after:h-5", "after:w-5",
+                             "after:transition-all",
+                             "peer-checked:after:translate-x-full",
+                             "peer-checked:after:border-white");
+
+    input.onchange = () => {
+        if (pin.mode === "manual") {
+            const newState = input.checked ? 1 : 0;
+            ws.send(JSON.stringify({
+                action: "set_state",
+                pin: pin.pin,
+                state: newState
+            }));
+        }
     };
-    topRow.appendChild(button);
-  } else if (pin.mode === "auto") {
-    const statusSpan = document.createElement("span");
-    statusSpan.title = "Текущее состояние пина";
-    statusSpan.className = pin.state
-      ? "bg-green-600 px-4 py-1 rounded text-white font-bold"
-      : "bg-red-600 px-4 py-1 rounded text-white font-bold";
-    topRow.appendChild(statusSpan);
-  }
+
+    toggleWrapper.appendChild(input);
+    toggleWrapper.appendChild(toggleDiv);
+    topRow.appendChild(toggleWrapper);
+  } 
   newDiv.appendChild(topRow);
 
   
@@ -105,13 +116,7 @@ export function renderPin(pin, ws) {
     toInput.onchange = sendSchedule;
 
     timeRow.append(fromInput, separator, toInput);
-    
-    const statusLabel = document.createElement("span");
-    statusLabel.innerText = pin.state ? "ВКЛЮЧЕН" : "ВЫКЛЮЧЕН";
-    statusLabel.className = pin.state
-        ? "text-green-400 font-bold"
-        : "text-red-400 font-bold";
-newDiv.appendChild(timeRow);
+    newDiv.appendChild(timeRow);
   }
 
   const existing = document.getElementById(newDiv.id);
@@ -123,9 +128,9 @@ newDiv.appendChild(timeRow);
 }
 
 export function renderReport(data, ws) {
-  if (data.pin_list.length > 1) {
-    data.pin_list.forEach(pin => renderPin(pin, ws));
-  } else {
-    renderPin(data.pin_list[0], ws)
-  }
+    if (data.pin_list.length === 1) {
+        renderPin(data.pin_list[0], ws)
+    } else if (data.pin_list.length > 1) {
+        data.pin_list.forEach(pin => renderPin(pin, ws));
+    }
 }

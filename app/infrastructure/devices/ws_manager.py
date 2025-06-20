@@ -16,6 +16,7 @@ class DeviceWebSocketManager:
 
     async def add(self, device_id: int, ws: WebSocket):
         self.active[device_id] = ws
+        event_bus.emit('device_status', device_id, True)
 
     async def remove(self, device_id: int) -> bool:
         try:
@@ -23,6 +24,7 @@ class DeviceWebSocketManager:
             await self.active[device_id].close()
         except Exception as e:
             logger.error(e)
+            event_bus.emit('device_status', device_id, False)
             return False
         return True
 

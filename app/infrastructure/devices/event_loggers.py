@@ -1,5 +1,6 @@
 from app.config.config import event_bus
 from app.infrastructure.logger_module.utils import get_logger_factory
+from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 get_logger = get_logger_factory('device')
 logger = get_logger()

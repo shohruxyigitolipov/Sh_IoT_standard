@@ -29,3 +29,10 @@ async def handle_message_from_device(device_id, message):
     print(message)
     if message_type == 'report':
         await web_ws_manager.send_personal(device_id, message)
+
+@event_bus.on('device_status')
+async def handle_message_failed(device_id, status: bool):
+    await web_ws_manager.send_personal(device_id, {
+        'type': 'device_status',
+        'status': status
+    })
