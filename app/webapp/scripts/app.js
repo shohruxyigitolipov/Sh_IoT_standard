@@ -1,12 +1,11 @@
 // app.js
-import { ReconnectingWebSocketWrapper } from "./websocket.js";
+import { WebSocketWrapper } from "./websocket.js";
 import { renderReport } from "./renderer.js";
 import { changeDeviceStatus } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const status = document.getElementById("connection_status");
-
-  const wsClient = new ReconnectingWebSocketWrapper("ws://localhost:8000/interfaces/web/ws/1/connect");
+  const wsClient = new WebSocketWrapper("ws://localhost:8000/interfaces/web/ws/1/connect");
 
   wsClient.onOpen = (ws) => {
     status.innerText = "✅ Подключено к серверу";
@@ -22,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (data.type === "report") {
         renderReport(data, ws);
+
         changeDeviceStatus(true);
       } else if (data.type === "device_status") {
         changeDeviceStatus(data.status, ws);

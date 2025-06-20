@@ -1,5 +1,5 @@
 // websocket.js
-export class ReconnectingWebSocketWrapper {
+export class WebSocketWrapper {
   constructor(url, protocols = []) {
     this.url = url;
     this.protocols = protocols;

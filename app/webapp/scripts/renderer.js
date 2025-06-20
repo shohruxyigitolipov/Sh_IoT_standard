@@ -32,8 +32,6 @@ export function renderPin(pin, ws) {
       pin: pin.pin,
       mode: newMode
     }));
-    pin.mode = newMode;
-    renderPin(pin, ws);
   };
 
   leftGroup.append(label, modeSelect);
@@ -128,9 +126,5 @@ if (pin.mode === "manual" || pin.mode === "auto") {
 }
 
 export function renderReport(data, ws) {
-    if (data.pin_list.length === 1) {
-        renderPin(data.pin_list[0], ws)
-    } else if (data.pin_list.length > 1) {
-        data.pin_list.forEach(pin => renderPin(pin, ws));
-    }
+    data.pin_list.forEach(pin => renderPin(pin, ws));
 }
