@@ -10,15 +10,15 @@ export function renderPin(pin, ws) {
   const topRow = document.createElement("div");
   topRow.className = "flex justify-between items-center gap-2";
 
-  const leftGroup = document.createElement("div");
-  leftGroup.className = "flex items-center gap-4";
+  const centerGroup = document.createElement("div");
+  centerGroup.className = "flex items-center gap-4";
 
   const label = document.createElement("span");
   label.innerText = `GPIO${pin.pin}`;
   const modeSelect = createModeSelect(pin, ws);
 
-  leftGroup.append(label, modeSelect);
-  topRow.appendChild(leftGroup);
+  centerGroup.append(label, modeSelect);
+  topRow.appendChild(centerGroup);
 
   if (["manual", "auto"].includes(pin.mode)) {
     const toggle = createToggle(pin, ws);
