@@ -1,6 +1,6 @@
 // app.js
 import { WebSocketWrapper } from "./websocket.js";
-import { renderReport } from "./renderer.js";
+import { renderPins } from "./renderer.js";
 import { changeDeviceStatus } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,22 +20,16 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Received data:", data);
 
       if (data.type === "report") {
-        renderReport(data, ws);
-
-        changeDeviceStatus(true);
+        renderPins(data, ws);
       } else if (data.type === "device_status") {
         changeDeviceStatus(data.status, ws);
-      } else if (data.action === "set_state") {
-        const btn = document.getElementById("GPIO" + data.pin);
-        btn.innerText = data.state ? "Выключить" : "Включить";
-        changeDeviceStatus(true)
       }
     } catch (err) {
       console.error("Ошибка парсинга JSON:", err);
     }
   };
 
-  wsClient.onClose = (event) => {
+  wsClient.onClose = () => {
     status.innerText = "❌ Соединение закрыто. Переподключение...";
   };
 });

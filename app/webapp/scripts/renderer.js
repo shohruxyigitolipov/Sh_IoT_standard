@@ -1,6 +1,8 @@
 
 // renderer.js
 
+import {changeDeviceStatus} from "./utils";
+
 export function renderPin(pin, ws) {
   const container = document.getElementById("pins_container");
   const newDiv = document.createElement("div");
@@ -125,6 +127,7 @@ if (pin.mode === "manual" || pin.mode === "auto") {
   }
 }
 
-export function renderReport(data, ws) {
+export function renderPins(data, ws) {
     data.pin_list.forEach(pin => renderPin(pin, ws));
+    changeDeviceStatus(true);
 }
