@@ -1,10 +1,7 @@
-from app.config.config import event_bus
-from app.config.container import get_device_service
+from app.config import event_bus
 from app.infrastructure.devices.in_memory_state import device_state
 from app.infrastructure.devices.ws_manager import device_ws_manager
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
-
-device_service = get_device_service()
 
 
 @event_bus.on('web_ws_disconnected')

@@ -3,7 +3,6 @@ from aiogram.filters import Command
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 user_rt = Router(name='users')
-
 url = f"https://shiotstandard-production.up.railway.app"
 
 

@@ -3,7 +3,7 @@ import asyncio
 from fastapi import status
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
-from app.config.config import event_bus
+from app.config import event_bus
 from app.infrastructure.devices.ws_manager import device_ws_manager
 from app.infrastructure.logger_module.utils import get_logger_factory
 

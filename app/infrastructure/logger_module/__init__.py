@@ -1,5 +1,5 @@
 # from . import config
-# from . import telegram
+# from . import telegram_client
 # from . import utils
 # from .utils import get_logger_factory
 #

@@ -3,7 +3,7 @@ import asyncio
 from fastapi import status
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 
-from app.config.config import event_bus
+from app.config import event_bus
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 
@@ -20,6 +20,7 @@ class WebClientWebSocketSession:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
         event_bus.emit('web_ws_connected', device_id, websocket)
+        print('web_ws_connected')
         await web_ws_manager.add(device_id=device_id, ws=websocket)
         await self._listen(websocket, device_id)
 

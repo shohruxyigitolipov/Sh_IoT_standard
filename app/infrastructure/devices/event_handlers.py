@@ -1,6 +1,6 @@
 import json
 from fastapi import WebSocket
-from app.config.config import event_bus
+from app.config import event_bus
 from app.infrastructure.devices.in_memory_state import device_state
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 

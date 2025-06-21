@@ -1,13 +1,13 @@
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
-from app.config.config import BOT_TOKEN
+from app.config import BOT_TOKEN
 import pytz
 from datetime import datetime
 
-from app.telegram.routers import user_rt
+from telegram_client.routers import user_rt
 
 default = DefaultBotProperties(parse_mode='MARKDOWN')
-
+print(BOT_TOKEN)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 

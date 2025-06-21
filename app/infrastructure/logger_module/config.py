@@ -1,6 +1,6 @@
 # logging_config.py
 from logging.config import dictConfig
-from app.config.config import LoggingSettings
+from app.config import LoggingSettings
 
 
 class LoggingConfig:

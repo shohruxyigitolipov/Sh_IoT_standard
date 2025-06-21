@@ -1,6 +1,6 @@
 from typing import Dict, cast, Literal
 
-from app.config.config import pins_config, PinMode, PinState, const_pins
+from app.config import pins_config, PinMode, PinState, const_pins
 from app.domain.devices.interfaces import IDeviceStateManager
 
 

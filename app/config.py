@@ -1,17 +1,14 @@
 import os
-from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pyee.asyncio import AsyncIOEventEmitter
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # config/ -> app/ -> проект
-ENV_PATH = BASE_DIR / ".env"
-load_dotenv(dotenv_path=ENV_PATH)
+load_dotenv()
 
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-url = os.getenv('PUBLIC_HOST')
+url = os.getenv('HOST')
 event_bus = AsyncIOEventEmitter()
 
 PinMode = Literal["manual", "auto"]
@@ -36,7 +33,7 @@ class LoggingSettings(BaseSettings):
     formatter: str = "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
     telegram_formatter: str = "[%(levelname)s] %(name)s:%(lineno)d\n%(message)s"
     model_config = SettingsConfigDict(
-        env_file="../../.env",  # путь до вашего .env
+        env_file="../.env",  # путь до вашего .env
         env_file_encoding="utf-8",  # кодировка .env
         extra='ignore'
     )
