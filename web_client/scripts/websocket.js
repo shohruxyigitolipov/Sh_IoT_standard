@@ -90,9 +90,10 @@ export class WebSocketSender {
 
   _send(data) {
     this.ws.send(JSON.stringify(data))
-    console.log('hello')
+    console.log(window.host)
+
   }
 }
 
-export const wsClient = new WebSocketWrapper("ws://localhost:8000/interfaces/web/ws/1/connect");
+export const wsClient = new WebSocketWrapper(`ws://${window.host}/interfaces/web/ws/1/connect`);
 export const wsSender = new WebSocketSender(wsClient.ws);

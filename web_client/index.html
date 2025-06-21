@@ -8,16 +8,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6">
-    <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
-        <h1 class="text-2xl font-bold mb-4 text-center">Управление пинами (ESP32-S3)</h1>
+<div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
+    <h1 class="text-2xl font-bold mb-4 text-center">Управление пинами (ESP32-S3)</h1>
 
-        <div id="connection_status" class="text-center text-gray-400 mb-4">Не подключено</div>
+    <div id="connection_status" class="text-center text-gray-400 mb-4">Не подключено</div>
 
-        <div id="pins_container" class="space-y-4"></div>
+    <div id="pins_container" class="space-y-4"></div>
 
-        <div class="text-sm text-gray-400 mt-6" id="device_status">Статус девайса: Не активен</div>
-    </div>
+    <div class="text-sm text-gray-400 mt-6" id="device_status">Статус девайса: Не активен</div>
+</div>
 
-    <script type="module" src="/static/scripts/app.js"></script>
+
+<script>
+    window.host = "{{ host }}";
+    console.log("Значение из .env:", host);
+</script>
+<script type="module" src="/static/scripts/app.js"></script>
 </body>
 </html>

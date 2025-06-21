@@ -7,7 +7,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from app.config import LoggingSettings
-from device_client.main import run_device
+from device_client.main import run_device, host
 from telegram_client.bot import run_telegram_bot
 from app.interface.device.routers import router as device_rt
 from app.interface.web.routers import router as web_interface_rt
@@ -38,4 +38,4 @@ templates = Jinja2Templates(directory='web_client')
 
 @app.get('/', response_class=HTMLResponse)
 async def welcome(request: Request):
-    return templates.TemplateResponse('index.html', {'request': request})
+    return templates.TemplateResponse('index.html', {'request': request, 'host': host})
