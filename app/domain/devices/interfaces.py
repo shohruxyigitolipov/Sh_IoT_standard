@@ -1,7 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict
-
-from app.application.devices.commands import SetMode, SetState, SetSchedule
 
 
 class IDeviceStateManager(ABC):
