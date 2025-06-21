@@ -1,0 +1,88 @@
+import asyncio
+import datetime
+import json
+from typing import Literal, Dict, cast
+
+PinMode = Literal["manual", "auto"]
+PinState = Literal[1, 0]
+const_pins = [4, 5, 15, 16, 17, 18, 21, 22, 23]
+pins_config = {i: {'mode': 'manual', 'state': 0} for i in const_pins}
+
+
+class DeviceImitator:
+    def __init__(self):
+        self.ws = None
+        self.pin_modes: Dict[int, PinMode] = {}
+        self.pin_status: Dict[int, PinState] = {}
+        self.pin_schedule: Dict[int, Dict[str, str]] = {}
+
+        for pin, cfg in pins_config.items():
+            self.pin_modes[pin] = cast(PinMode, cfg["mode"])
+            self.pin_status[pin] = cast(PinState, cfg["state"])
+        for pin in const_pins:
+            self.pin_schedule[pin] = {'on_time': '12:00', 'off_time': '13:00'}
+        print(self.pin_schedule)
+
+    async def set_ws(self, websocket):
+        self.ws = websocket
+
+    async def report_to(self, pin: int = None):
+        if not pin:
+            pin_list = []
+            for pin in const_pins:
+                pin_list.append(pin)
+        else:
+            pin_list = [pin]
+        report_data = []
+        for pin in pin_list:
+            data = {'pin': pin,
+                    'state': self.pin_status.get(pin),
+                    'mode': self.pin_modes.get(pin),
+                    'schedule': self.pin_schedule.get(pin)}
+            report_data.append(data)
+        payload = {'type': 'report', 'pin_list': report_data}
+        print(payload)
+        await self.ws.send(json.dumps(payload))
+
+    async def set_mode(self, pin: int, mode: PinMode):
+        self.pin_modes[pin] = mode
+        await self.report_to(pin)
+
+    async def set_state(self, pin: int, state: PinState):
+        self.pin_status[pin] = state
+        await self.report_to(pin)
+
+    async def set_schedule(self, pin: int, on_time: str, off_time: str):
+        self.pin_schedule[pin] = {"on_time": on_time, "off_time": off_time}
+        await self.report_to(pin)
+
+    async def run_schedule(self, period: Literal[30, 60]):
+        print('Scheduler started!')
+        while True:
+            now = datetime.datetime.now().time()
+            for pin in const_pins:
+                if self.pin_modes[pin] != 'auto':
+                    continue
+
+                time_cfg = self.pin_schedule[pin]
+                on_time_str = time_cfg.get('on_time')  # '12:00'
+                off_time_str = time_cfg.get('off_time')  # '13:00'
+                if on_time_str and off_time_str:
+                    on_time = datetime.datetime.strptime(on_time_str, "%H:%M").time()
+                    off_time = datetime.datetime.strptime(off_time_str, "%H:%M").time()
+
+                    if on_time < off_time:
+                        # обычный интервал: например, 12:00 - 13:00
+                        is_on = on_time <= now < off_time
+                    else:
+                        # ночной интервал: например, 22:00 - 06:00
+                        is_on = now >= on_time or now < off_time
+
+                    self.pin_status[pin] = 1 if is_on else 0
+                    await self.report_to(pin)
+                    print(f'Now: {now}\non_time: {on_time}\noff_time: {off_time}')
+                    print(f'{pin} - {is_on}')
+            await asyncio.sleep(period)
+
+    async def start(self):
+        asyncio.create_task(self.run_schedule(period=30))
