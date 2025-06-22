@@ -18,7 +18,7 @@ export function renderPin(pin, ws) {
 
   const modeSelect = createModeSelect(pin, ws);
 
-  centerGroup.append(label, renameBtn, modeSelect);
+  centerGroup.append(label, modeSelect);
   topRow.appendChild(centerGroup);
 
   if (["manual", "auto"].includes(pin.mode)) {
@@ -43,6 +43,5 @@ export function renderPin(pin, ws) {
 
 export function renderPins(data, ws) {
   data.pin_list.forEach(pin => renderPin(pin, ws));
-  console.log('renderPin')
   changeDeviceStatus(true);
 }

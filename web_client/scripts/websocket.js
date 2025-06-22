@@ -98,7 +98,6 @@ export class WebSocketSender {
 
   _send(data) {
     this.ws.send(JSON.stringify(data))
-    console.log('hello')
   }
 }
 
