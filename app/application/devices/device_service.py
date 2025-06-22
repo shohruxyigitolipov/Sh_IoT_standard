@@ -16,3 +16,6 @@ class DeviceService:
 
     async def set_schedule(self, pin: int, on_time: str, off_time: str):
         await self.state.set_schedule(pin=pin, on_time=on_time, off_time=off_time)
+
+    async def set_name(self, pin: int, name: str):
+        await self.state.set_name(pin=pin, name=name)

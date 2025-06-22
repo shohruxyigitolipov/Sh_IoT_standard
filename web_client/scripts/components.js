@@ -78,3 +78,21 @@ export function createTimeRow(pin, ws) {
   timeRow.append(fromInput, document.createTextNode("–"), toInput);
   return timeRow;
 }
+
+export function createRenameButton(pin) {
+  const btn = document.createElement("button");
+  btn.textContent = "✏️";
+  btn.title = "Переименовать";
+  btn.className = "text-sm";
+  btn.onclick = () => {
+    const newName = prompt("Введите название пина", pin.name || "");
+    if (newName !== null) {
+      wsSender.set_pin_name(pin.pin, newName);
+      const label = document.getElementById(`pin-name-${pin.pin}`);
+      if (label) {
+        label.innerText = newName || `GPIO${pin.pin}`;
+      }
+    }
+  };
+  return btn;
+}

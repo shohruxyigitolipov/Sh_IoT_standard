@@ -88,6 +88,14 @@ export class WebSocketSender {
       })
   }
 
+  set_pin_name(pin, name) {
+      this._send({
+          action: "set_pin_name",
+          pin: pin,
+          name: name
+      })
+  }
+
   _send(data) {
     this.ws.send(JSON.stringify(data))
     console.log('hello')
