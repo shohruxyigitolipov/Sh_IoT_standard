@@ -20,6 +20,13 @@ class IDeviceStateManager(ABC):
     @abstractmethod
     async def get_schedule(self, pin: int) -> int: ...
 
+    @abstractmethod
+    async def set_name(self, pin: int, name: str): ...
+
+    @abstractmethod
+    async def get_name(self, pin: int) -> str: ...
+
+
 
 class IDeviceSender(ABC):
     @abstractmethod

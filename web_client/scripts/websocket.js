@@ -88,12 +88,18 @@ export class WebSocketSender {
       })
   }
 
+  set_pin_name(pin, name) {
+      this._send({
+          action: "set_pin_name",
+          pin: pin,
+          name: name
+      })
+  }
+
   _send(data) {
     this.ws.send(JSON.stringify(data))
-    console.log(window.host)
-
   }
 }
 
-export const wsClient = new WebSocketWrapper(`wss://${window.host}/interfaces/web/ws/1/connect`);
+export const wsClient = new WebSocketWrapper("ws://localhost:8000/interfaces/web/ws/1/connect");
 export const wsSender = new WebSocketSender(wsClient.ws);

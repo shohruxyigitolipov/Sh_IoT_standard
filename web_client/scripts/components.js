@@ -78,3 +78,23 @@ export function createTimeRow(pin, ws) {
   timeRow.append(fromInput, document.createTextNode("–"), toInput);
   return timeRow;
 }
+
+export function createNameInput(pin) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = `GPIO${pin.pin}`;
+  input.className = "bg-gray-800 text-white p-1 rounded w-[120px] text-sm";
+  input.value = pin.name || "";
+
+  const send = () => {
+    wsSender.set_pin_name(pin.pin, input.value);
+  };
+
+  input.addEventListener("blur", send);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      input.blur();
+    }
+  });
+  return input;
+}

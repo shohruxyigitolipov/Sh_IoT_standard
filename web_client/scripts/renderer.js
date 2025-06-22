@@ -1,4 +1,5 @@
-import { createModeSelect, createToggle, createTimeRow } from "./components.js";
+import { createModeSelect, createToggle, createTimeRow, createNameInput } from "./components.js";
+
 import { changeDeviceStatus } from "./utils.js";
 
 export function renderPin(pin, ws) {
@@ -13,8 +14,8 @@ export function renderPin(pin, ws) {
   const centerGroup = document.createElement("div");
   centerGroup.className = "flex items-center gap-4";
 
-  const label = document.createElement("span");
-  label.innerText = `GPIO${pin.pin}`;
+  const label = createNameInput(pin);
+
   const modeSelect = createModeSelect(pin, ws);
 
   centerGroup.append(label, modeSelect);
@@ -42,6 +43,5 @@ export function renderPin(pin, ws) {
 
 export function renderPins(data, ws) {
   data.pin_list.forEach(pin => renderPin(pin, ws));
-  console.log('renderPin')
   changeDeviceStatus(true);
 }

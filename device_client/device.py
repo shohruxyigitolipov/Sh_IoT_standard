@@ -3,6 +3,10 @@ import datetime
 import json
 from typing import Literal, Dict, cast
 
+from device_client.logger_config import get_logger
+
+logger = get_logger("device_client")
+
 PinMode = Literal["manual", "auto"]
 PinState = Literal[1, 0]
 const_pins = [4, 5, 15, 16, 17, 18, 21, 22, 23]
@@ -15,16 +19,18 @@ class DeviceImitator:
         self.pin_modes: Dict[int, PinMode] = {}
         self.pin_status: Dict[int, PinState] = {}
         self.pin_schedule: Dict[int, Dict[str, str]] = {}
+        self.pin_names: Dict[int, str] = {}
 
         for pin, cfg in pins_config.items():
             self.pin_modes[pin] = cast(PinMode, cfg["mode"])
             self.pin_status[pin] = cast(PinState, cfg["state"])
         for pin in const_pins:
             self.pin_schedule[pin] = {'on_time': '12:00', 'off_time': '13:00'}
-        print(self.pin_schedule)
+        logger.info(f"Initial pin schedule: {self.pin_schedule}")
 
     async def set_ws(self, websocket):
         self.ws = websocket
+        logger.info("WebSocket connection established")
 
     async def report_to(self, pin: int = None):
         if not pin:
@@ -35,29 +41,46 @@ class DeviceImitator:
             pin_list = [pin]
         report_data = []
         for pin in pin_list:
-            data = {'pin': pin,
-                    'state': self.pin_status.get(pin),
-                    'mode': self.pin_modes.get(pin),
-                    'schedule': self.pin_schedule.get(pin)}
+            data = {
+                'pin': pin,
+                'state': self.pin_status.get(pin),
+                'mode': self.pin_modes.get(pin),
+                'schedule': self.pin_schedule.get(pin),
+                'name': self.pin_names.get(pin)
+            }
             report_data.append(data)
         payload = {'type': 'report', 'pin_list': report_data}
-        print(payload)
+        logger.info(f"Sending report: {payload}")
         await self.ws.send(json.dumps(payload))
 
     async def set_mode(self, pin: int, mode: PinMode):
         self.pin_modes[pin] = mode
+        logger.info(f"Mode for pin {pin} set to {mode}")
         await self.report_to(pin)
 
     async def set_state(self, pin: int, state: PinState):
         self.pin_status[pin] = state
+        logger.info(f"State for pin {pin} set to {state}")
         await self.report_to(pin)
 
     async def set_schedule(self, pin: int, on_time: str, off_time: str):
         self.pin_schedule[pin] = {"on_time": on_time, "off_time": off_time}
+        logger.info(
+            f"Schedule for pin {pin} updated: on_time={on_time}, off_time={off_time}"
+        )
+        await self.report_to(pin)
+
+    async def set_name(self, pin: int, name: str | None):
+        if name:
+            self.pin_names[pin] = name
+            logger.info(f"Name for pin {pin} set to {name}")
+        else:
+            self.pin_names.pop(pin, None)
+            logger.info(f"Name for pin {pin} cleared")
         await self.report_to(pin)
 
     async def run_schedule(self, period: Literal[30, 60]):
-        print('Scheduler started!')
+        logger.info('Scheduler started')
         while True:
             gmt_plus_5 = datetime.timezone(datetime.timedelta(hours=5))
             now = datetime.datetime.now(gmt_plus_5).time()
@@ -81,8 +104,10 @@ class DeviceImitator:
 
                     self.pin_status[pin] = 1 if is_on else 0
                     await self.report_to(pin)
-                    print(f'Now: {now}\non_time: {on_time}\noff_time: {off_time}')
-                    print(f'{pin} - {is_on}')
+                    logger.info(
+                        f'Now: {now} | on_time: {on_time} | off_time: {off_time}'
+                    )
+                    logger.info(f'Pin {pin} state in schedule: {is_on}')
             await asyncio.sleep(period)
 
     async def start(self):

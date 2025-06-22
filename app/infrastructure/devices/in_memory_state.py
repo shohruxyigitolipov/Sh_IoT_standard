@@ -9,12 +9,14 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
         self.pin_modes: Dict[int, PinMode] = {}
         self.pin_state: Dict[int, PinState] = {}
         self.pin_schedule: Dict[int, Dict[str, str]] = {}
+        self.pin_names: Dict[int, str] = {}
 
         for pin, cfg in pins_config.items():
             self.pin_modes[pin] = cast(PinMode, cfg["mode"])
             self.pin_state[pin] = cast(PinState, cfg["state"])
         for pin in const_pins:
             self.pin_schedule[pin] = {'on_time': '12:00', 'off_time': '13:00'}
+
 
     async def set_mode(self, pin, mode):
         self.pin_modes[pin] = mode
@@ -24,6 +26,12 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
 
     async def set_schedule(self, pin, on_time, off_time):
         self.pin_schedule[pin] = {'on_time': on_time, 'off_time': off_time}
+
+    async def set_name(self, pin: int, name: str):
+        self.pin_names[pin] = name
+
+    async def get_name(self, pin: int) -> str | None:
+        return self.pin_names.get(pin)
 
     async def get_mode(self, pin) -> Literal["manual", "auto"] | None:
         return self.pin_modes.get(pin)
@@ -43,13 +51,16 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
             pin_list = [pin]
         report_data = []
         for pin in pin_list:
-            data = {'pin': pin,
-                    'state': await self.get_state(pin),
-                    'mode': await self.get_mode(pin),
-                    'schedule': await self.get_schedule(pin=pin)}
+            data = {
+                'pin': pin,
+                'state': await self.get_state(pin),
+                'mode': await self.get_mode(pin),
+                'schedule': await self.get_schedule(pin=pin),
+                'name': await self.get_name(pin)
+            }
+
             report_data.append(data)
         payload = {'type': 'report', 'pin_list': report_data}
         return payload
-
 
 device_state = InMemoryDeviceStateManager()

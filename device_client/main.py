@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from device_client.device import DeviceImitator
 import os
 
+from device_client.logger_config import get_logger
+
+logger = get_logger("device_client")
+
 device = DeviceImitator()
 load_dotenv('.env')
 host = os.getenv('HOST')
@@ -24,7 +28,9 @@ async def websocket_client():
     global ws_connection
     while True:
         try:
+            logger.info("Connecting to server...")
             async with websockets.connect(f"ws://{host}/devices/ws/1/connect") as websocket:
+                logger.info("WebSocket connected")
                 await websocket.send(json.dumps({'auth_token': auth_token}))
 
                 while True:
@@ -32,24 +38,25 @@ async def websocket_client():
                         msg = await websocket.recv()
                         if msg == 'ping':
                             await websocket.send('pong')
+                            logger.info('Received ping, sent pong')
                             continue
 
                         try:
                             data = json.loads(msg)
                         except json.JSONDecodeError:
-                            print(f"[{now()}] ⚠️ Bad JSON:", msg)
+                            logger.warning(f"Bad JSON received: {msg}")
                             continue
 
                         event_bus.emit('message_from_server', data, websocket)
 
                     except websockets.ConnectionClosed as e:
-                        print(f"[{now()}] 🔌 Disconnected: {e}. Reconnecting in {RECONNECT_DELAY}s…")
+                        logger.warning(f"Disconnected: {e}. Reconnecting in {RECONNECT_DELAY}s…")
                         break
 
                     await asyncio.sleep(0.01)
 
         except Exception as e:
-            print(f"[{now()}] ❌ Connection error: {e}. Reconnecting in {RECONNECT_DELAY}s…")
+            logger.error(f"Connection error: {e}. Reconnecting in {RECONNECT_DELAY}s…")
             await asyncio.sleep(RECONNECT_DELAY)
 
 
@@ -59,9 +66,9 @@ async def handle_message(msg, ws):
     try:
         data = json.loads(msg)
     except:
-        print(f"Not JSON: {msg}")
+        logger.warning(f"Not JSON: {msg}")
         return
-    print(f'Message from server: {data}')
+    logger.info(f'Message from server: {data}')
     action = data.get('action')
     pin = data.get('pin')
     pin = int(pin) if pin else None
@@ -70,28 +77,28 @@ async def handle_message(msg, ws):
     if action == 'set_state':
         state = data.get('state')
         await device.set_state(pin=pin, state=int(state))
-        print(f"[{now()}] ⚙️ GPIO {pin} set to {state}")
+        logger.info(f"GPIO {pin} set to {state}")
 
     elif action == 'set_mode':
         mode = data.get('mode')
         await device.set_mode(pin=pin, mode=mode)
-        print(f"[{now()}] 🔁 Mode set for GPIO {pin}: {mode}")
+        logger.info(f"Mode set for GPIO {pin}: {mode}")
 
     elif action == 'set_schedule':
         schedule = data.get('schedule')
         on = schedule.get('on_time')
         off = schedule.get('off_time')
         await device.set_schedule(pin=pin, on_time=on, off_time=off)
-        print(f"[{now()}] ⏱ Schedule set for GPIO {pin}: on - {on}, off - {off}")
+        logger.info(f"Schedule set for GPIO {pin}: on - {on}, off - {off}")
+    elif action == 'set_pin_name':
+        await device.set_name(pin=pin, name=data.get('name'))
+        logger.info(f"Name set for GPIO {pin}: {data.get('name')}")
     elif action == 'report':
         await device.report_to()
-
-
-# ------------------------------
-def now():
-    return f"{asyncio.get_event_loop().time():.1f}"
+        logger.info('Report requested')
 
 
 async def run_device():
+    logger.info("Device client starting")
     await asyncio.sleep(5)
     await asyncio.gather(websocket_client(), device.start())
