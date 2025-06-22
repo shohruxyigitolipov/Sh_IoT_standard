@@ -6,7 +6,7 @@ from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from app.config import LoggingSettings, HOST
+from app.config import LoggingSettings, HOST, device_run
 from device_client.main import run_device
 from telegram_client.bot import run_telegram_bot
 from app.interface.device.routers import router as device_rt
@@ -25,7 +25,8 @@ def get_logger(name: str = __name__) -> logging.Logger:
 async def lifespan(app: FastAPI):
     loop = asyncio.get_event_loop()
     loop.create_task(run_telegram_bot())
-    loop.create_task(run_device())
+    if device_run:
+        loop.create_task(run_device())
     yield
 
 
