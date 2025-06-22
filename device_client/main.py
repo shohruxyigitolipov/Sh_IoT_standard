@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from device_client.device import DeviceImitator
 import os
 
-from logger_config import get_logger
+from device_client.logger_config import get_logger
 
 logger = get_logger("device_client")
 
