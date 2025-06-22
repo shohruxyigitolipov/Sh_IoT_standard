@@ -15,6 +15,7 @@ class DeviceImitator:
         self.pin_modes: Dict[int, PinMode] = {}
         self.pin_status: Dict[int, PinState] = {}
         self.pin_schedule: Dict[int, Dict[str, str]] = {}
+        self.pin_names: Dict[int, str] = {}
 
         for pin, cfg in pins_config.items():
             self.pin_modes[pin] = cast(PinMode, cfg["mode"])
@@ -35,10 +36,13 @@ class DeviceImitator:
             pin_list = [pin]
         report_data = []
         for pin in pin_list:
-            data = {'pin': pin,
-                    'state': self.pin_status.get(pin),
-                    'mode': self.pin_modes.get(pin),
-                    'schedule': self.pin_schedule.get(pin)}
+            data = {
+                'pin': pin,
+                'state': self.pin_status.get(pin),
+                'mode': self.pin_modes.get(pin),
+                'schedule': self.pin_schedule.get(pin),
+                'name': self.pin_names.get(pin)
+            }
             report_data.append(data)
         payload = {'type': 'report', 'pin_list': report_data}
         print(payload)
@@ -54,6 +58,13 @@ class DeviceImitator:
 
     async def set_schedule(self, pin: int, on_time: str, off_time: str):
         self.pin_schedule[pin] = {"on_time": on_time, "off_time": off_time}
+        await self.report_to(pin)
+
+    async def set_name(self, pin: int, name: str | None):
+        if name:
+            self.pin_names[pin] = name
+        else:
+            self.pin_names.pop(pin, None)
         await self.report_to(pin)
 
     async def run_schedule(self, period: Literal[30, 60]):

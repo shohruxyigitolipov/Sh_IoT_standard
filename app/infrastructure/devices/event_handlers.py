@@ -35,7 +35,7 @@ async def handle_message_from_device(device_id: int, message: str):
                 on_time=schedule.get('on_time'),
                 off_time=schedule.get('off_time')
             )
-            await device_state.set_name(pin=pin.get('pin'), name=pin.get('name') or '')
+            await device_state.set_name(pin=pin.get('pin'), name=pin.get('name', None))
 
         await web_ws_manager.send_personal(device_id, data=message)
 

@@ -27,6 +27,7 @@ class IDeviceStateManager(ABC):
     async def get_name(self, pin: int) -> str: ...
 
 
+
 class IDeviceSender(ABC):
     @abstractmethod
     async def send(self, device_id: int, data: dict) -> dict: ...

@@ -51,14 +51,16 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
             pin_list = [pin]
         report_data = []
         for pin in pin_list:
-            data = {'pin': pin,
-                    'state': await self.get_state(pin),
-                    'mode': await self.get_mode(pin),
-                    'schedule': await self.get_schedule(pin=pin),
-                    'name': await self.get_name(pin)}
+            data = {
+                'pin': pin,
+                'state': await self.get_state(pin),
+                'mode': await self.get_mode(pin),
+                'schedule': await self.get_schedule(pin=pin),
+                'name': await self.get_name(pin)
+            }
+
             report_data.append(data)
         payload = {'type': 'report', 'pin_list': report_data}
         return payload
-
 
 device_state = InMemoryDeviceStateManager()
