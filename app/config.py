@@ -15,7 +15,7 @@ event_bus = AsyncIOEventEmitter()
 PinMode = Literal["manual", "auto"]
 PinState = Literal[1, 0]
 
-const_pins = [4, 5, 15, 16, 17, 18, 21, 22, 23]
+const_pins = [4, 5, 12, 13, 14]
 pins_config = {i: {'mode': 'manual', 'state': 0} for i in const_pins}
 
 
