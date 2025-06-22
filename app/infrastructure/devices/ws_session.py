@@ -24,6 +24,7 @@ class DeviceWebSocketSession:
             await asyncio.sleep(3)
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
+        event_bus.emit("device_status", device_id, True)
         event_bus.emit('device_ws_connected', device_id, websocket)
         await device_ws_manager.add(device_id, websocket)
 
