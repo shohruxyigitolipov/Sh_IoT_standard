@@ -101,5 +101,5 @@ export class WebSocketSender {
   }
 }
 
-export const wsClient = new WebSocketWrapper(`ws://${window.host}/interfaces/web/ws/1/connect`);
+export const wsClient = new WebSocketWrapper(`wss://${window.host}/interfaces/web/ws/1/connect`);
 export const wsSender = new WebSocketSender(wsClient.ws);
