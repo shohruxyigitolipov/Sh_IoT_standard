@@ -8,7 +8,7 @@ from pyee.asyncio import AsyncIOEventEmitter
 load_dotenv()
 
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-url = os.getenv('HOST')
+HOST = os.getenv('HOST')
 event_bus = AsyncIOEventEmitter()
 
 PinMode = Literal["manual", "auto"]
