@@ -59,7 +59,8 @@ class DeviceImitator:
     async def run_schedule(self, period: Literal[30, 60]):
         print('Scheduler started!')
         while True:
-            now = datetime.datetime.now().time()
+            gmt_plus_5 = datetime.timezone(datetime.timedelta(hours=5))
+            now = datetime.datetime.now(gmt_plus_5).time()
             for pin in const_pins:
                 if self.pin_modes[pin] != 'auto':
                     continue
