@@ -17,6 +17,7 @@ def get_logger(name: str) -> logging.Logger:
         formatter = YellowFormatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
+    logger.propagate = False
 
     return logger
 
