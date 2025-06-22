@@ -14,7 +14,9 @@ def get_logger(name: str) -> logging.Logger:
 
     if not logger.handlers:
         handler = logging.StreamHandler()
-        formatter = YellowFormatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s')
+        formatter = YellowFormatter(
+            '%(asctime)s [%(name)s] %(levelname)s: %(message)s (%(filename)s:%(lineno)d)'
+        )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
     logger.propagate = False
