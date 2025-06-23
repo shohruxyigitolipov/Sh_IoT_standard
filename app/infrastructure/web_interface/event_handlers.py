@@ -1,11 +1,19 @@
+from starlette.websockets import WebSocket
+
 from app.config import event_bus
 from app.infrastructure.devices.in_memory_state import device_state
 from app.infrastructure.devices.ws_manager import device_ws_manager
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 
+@event_bus.on('web_ws_connected')
+async def handle_connection(device_id, ws: WebSocket):
+    status = device_id in device_ws_manager.active
+    event_bus.emit('device_status', device_id, status)
+
+
 @event_bus.on('web_ws_disconnected')
-async def handle_connection(device_id):
+async def handle_disconnection(device_id):
     await web_ws_manager.remove(device_id)
 
 
