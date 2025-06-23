@@ -12,6 +12,7 @@ from telegram_client.bot import run_telegram_bot
 from app.interface.device.routers import router as device_rt
 from app.interface.web.routers import router as web_interface_rt
 from app.infrastructure.logger_module.config import LoggingConfig
+from app.infrastructure.devices.redis_state import device_state
 
 settings = LoggingSettings()  # прочитает .env автоматически
 LoggingConfig(settings).setup()
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
     loop.create_task(run_telegram_bot())
     if DEVICE_RUN:
         loop.create_task(run_device())
+    await device_state.preload()
     yield
 
 

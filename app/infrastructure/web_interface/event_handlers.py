@@ -1,7 +1,7 @@
 from starlette.websockets import WebSocket
 
 from app.config import event_bus
-from app.infrastructure.devices.in_memory_state import device_state
+from app.infrastructure.devices.redis_state import device_state
 from app.infrastructure.devices.ws_manager import device_ws_manager
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
@@ -23,6 +23,6 @@ async def handle_message_from_device(device_id, data):
     if not action:
         return
     if action == 'get_report':
-        await web_ws_manager.send_personal(device_id, data=await device_state.get_report())
+        await web_ws_manager.send_personal(device_id, data=await device_state.get_report(device_id))
     else:
         await device_ws_manager.send_personal(device_id, data=data)
