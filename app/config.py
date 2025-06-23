@@ -9,6 +9,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 HOST = os.getenv('HOST')
+WS_PROTOCOL = os.getenv('WS_PROTOCOL')
 event_bus = AsyncIOEventEmitter()
 
 PinMode = Literal["manual", "auto"]
