@@ -17,7 +17,6 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
         for pin in const_pins:
             self.pin_schedule[pin] = {'on_time': '12:00', 'off_time': '13:00'}
 
-
     async def set_mode(self, pin, mode):
         self.pin_modes[pin] = mode
 
@@ -62,5 +61,6 @@ class InMemoryDeviceStateManager(IDeviceStateManager):
             report_data.append(data)
         payload = {'type': 'report', 'pin_list': report_data}
         return payload
+
 
 device_state = InMemoryDeviceStateManager()

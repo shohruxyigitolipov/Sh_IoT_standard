@@ -27,8 +27,6 @@ class DeviceWebSocketManager:
     async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
         ws = self.active.get(device_id)
         if ws:
-            if isinstance(data, dict):
-                data = json.dumps(data)
             await ws.send_json(data)
         else:
             event_bus.emit('message_failed', device_id, data)
