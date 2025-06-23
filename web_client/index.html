@@ -6,14 +6,14 @@
     <meta charset="UTF-8">
     <title>Sh_IoT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6">
-    <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow">
+    <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-lg shadow relative">
+        <div id="device_status" class="device-status offline"></div>
         <h1 class="text-2xl font-bold mb-4 text-center">Управление устройством</h1>
 
         <div id="pins_container" class="space-y-4"></div>
-
-        <div class="text-sm text-gray-400 mt-6" id="device_status">Статус девайса: Не активен</div>
     </div>
     <script>
         window.host = "{{ host }}"
