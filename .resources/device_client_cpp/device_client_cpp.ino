@@ -1,9 +1,9 @@
 // device_client_cpp.ino — главный файл
 
-#include "src/wifi_manager.h"
-#include "src/time_manager.h"
-#include "src/PinController.h"
-#include "src/websocket_manager.h"
+#include "wifi_manager.h"
+#include "time_manager.h"
+#include "PinController.h"
+#include "websocket_manager.h"
 
 // Wi-Fi и WebSocket настройки
 const char* SSID = "Galaxy";
@@ -18,7 +18,7 @@ const size_t PIN_COUNT = sizeof(CONTROL_PINS) / sizeof(CONTROL_PINS[0]);
 WiFiManager wifi(SSID, PASSWORD);
 TimeManager timeManager(5 * 3600); // GMT+5
 PinController pinController;
-WebSocketManager wsManager;
+WebSocketManager wsManager(pinController);  // ✅ передаём контроллер
 
 unsigned long lastTimeSync = 0;
 unsigned long lastScheduleCheck = 0;
@@ -29,11 +29,7 @@ void setup() {
   timeManager.begin();
   pinController.setup(CONTROL_PINS, PIN_COUNT);
 
-  wsManager.onMessage([](const String& msg) {
-    pinController.handleCommand(msg);
-  });
-
-  wsManager.connect(WS_URL, AUTH_TOKEN);
+  wsManager.connect(WS_URL, AUTH_TOKEN); // ✅ без onMessage
 }
 
 void loop() {
@@ -48,9 +44,13 @@ void loop() {
   }
 
   if (now - lastScheduleCheck > 1000) {
-    pinController.handleAutoLogic();
-    lastScheduleCheck = now;
+  auto changedPins = pinController.handleAutoLogic();
+  for (int pin : changedPins) {
+    wsManager.send(pinController.generateReport(pin));  // отправка отчёта по каждому
   }
+  lastScheduleCheck = now;
+}
+
 
   if (!wsManager.isConnected()) {
     wsManager.connect(WS_URL, AUTH_TOKEN);

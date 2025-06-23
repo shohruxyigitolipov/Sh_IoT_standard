@@ -129,4 +129,3 @@ class RedisDeviceStateManager(IDeviceStateManager):
 
 
 device_state = RedisDeviceStateManager()
-

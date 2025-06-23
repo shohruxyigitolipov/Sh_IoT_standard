@@ -42,8 +42,9 @@ public:
                 return;
             }
 
-            pinController.handleCommand(data);
-            client.send(pinController.generateReport());
+            int changedPin = pinController.handleCommand(data);
+            String report = pinController.generateReport(changedPin);
+            client.send(report);
         });
 
         if (client.connect(wsUrl)) {
