@@ -43,5 +43,4 @@ export function renderPin(pin, ws) {
 
 export function renderPins(data, ws) {
   data.pin_list.forEach(pin => renderPin(pin, ws));
-  changeDeviceStatus(true);
 }
