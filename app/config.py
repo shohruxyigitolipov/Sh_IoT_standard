@@ -9,13 +9,14 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 HOST = os.getenv('HOST')
-device_run = int(os.getenv('DEVICE_RUN'))
+WS_PROTOCOL = os.getenv('WS_PROTOCOL')
+DEVICE_RUN = bool(os.getenv('DEVICE_RUN', 'false').lower() == 'true')
 event_bus = AsyncIOEventEmitter()
 
 PinMode = Literal["manual", "auto"]
 PinState = Literal[1, 0]
 
-const_pins = [4, 5, 12, 13, 14]
+const_pins = [4, 5, 15, 16, 17, 18, 21, 22, 23]
 pins_config = {i: {'mode': 'manual', 'state': 0} for i in const_pins}
 
 

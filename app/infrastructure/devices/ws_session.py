@@ -76,7 +76,6 @@ class DeviceWebSocketSession:
                 event_bus.emit("message_from_device", device_id, msg)
 
         except (asyncio.CancelledError, WebSocketDisconnect, Exception):
-            event_bus.emit("device_status", device_id, False)
             event_bus.emit("device_ws_disconnected", device_id)
             await device_ws_manager.remove(device_id)
 

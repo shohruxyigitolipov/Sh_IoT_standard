@@ -11,7 +11,7 @@ from device_client.logger_config import get_logger
 logger = get_logger("device_client")
 
 device = DeviceImitator()
-load_dotenv('.env')
+load_dotenv()
 host = os.getenv('HOST')
 
 event_bus = AsyncIOEventEmitter()
@@ -38,7 +38,6 @@ async def websocket_client():
                         msg = await websocket.recv()
                         if msg == 'ping':
                             await websocket.send('pong')
-                            logger.info('Received ping, sent pong')
                             continue
 
                         try:
@@ -62,12 +61,7 @@ async def websocket_client():
 
 # ------------------------------
 @event_bus.on('message_from_server')
-async def handle_message(msg, ws):
-    try:
-        data = json.loads(msg)
-    except:
-        logger.warning(f"Not JSON: {msg}")
-        return
+async def handle_message(data, ws):
     logger.info(f'Message from server: {data}')
     action = data.get('action')
     pin = data.get('pin')
@@ -102,3 +96,7 @@ async def run_device():
     logger.info("Device client starting")
     await asyncio.sleep(5)
     await asyncio.gather(websocket_client(), device.start())
+
+
+if __name__ == "__main__":
+    asyncio.run(run_device())

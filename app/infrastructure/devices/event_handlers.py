@@ -10,6 +10,11 @@ async def handle_connection(device_id, ws: WebSocket):
     await ws.send_json(json.dumps({"message": "Вы подключились"}))
 
 
+@event_bus.on('device_ws_disconnected')
+async def handle_disconnection(device_id):
+    event_bus.emit('device_status', device_id, False)
+
+
 @event_bus.on('device_ws_timeout')
 async def handle_timeout(ws: WebSocket):
     await ws.send_json(json.dumps({"message": "Время ожидания истекло!"}))
