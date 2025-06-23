@@ -29,7 +29,7 @@ async def websocket_client():
     while True:
         try:
             logger.info("Connecting to server...")
-            async with websockets.connect(f"ws://{host}/devices/ws/1/connect") as websocket:
+            async with websockets.connect(f"ws://{host}/devices/ws/2/connect") as websocket:
                 logger.info("WebSocket connected")
                 await websocket.send(json.dumps({'auth_token': auth_token}))
 

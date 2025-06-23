@@ -7,7 +7,7 @@ from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 @event_bus.on('device_ws_connected')
 async def handle_connection(device_id, ws: WebSocket):
-    await ws.send_json(json.dumps({"message": "Вы подключились"}))
+    await ws.send_json(json.loads('{"message": "Вы подключились"}'))
 
 
 @event_bus.on('device_ws_disconnected')
@@ -42,7 +42,8 @@ async def handle_message_from_device(device_id: int, message: str):
                 off_time=schedule.get('off_time')
             )
             await device_state.set_name(device_id, pin=pin.get('pin'), name=pin.get('name', None))
-        await device_state.save_report(device_id, message)
+        full_report = await device_state.get_report(device_id)
+        await device_state.save_report(device_id, full_report)
         await web_ws_manager.send_personal(device_id, data=message)
 
 

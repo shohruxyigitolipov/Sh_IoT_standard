@@ -11,9 +11,7 @@ BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 HOST = os.getenv('HOST')
 WS_PROTOCOL = os.getenv('WS_PROTOCOL')
 DEVICE_RUN = bool(os.getenv('DEVICE_RUN', 'false').lower() == 'true')
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
-REDIS_DB = int(os.getenv('REDIS_DB', '0'))
+REDIS_URL = os.getenv('REDIS_URL')
 event_bus = AsyncIOEventEmitter()
 
 PinMode = Literal["manual", "auto"]

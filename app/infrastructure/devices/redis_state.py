@@ -2,16 +2,14 @@ import json
 from dataclasses import dataclass, field
 from typing import Dict, Literal
 
-from redis.asyncio import Redis
+from redis.asyncio import from_url
 
 from app.config import (
     pins_config,
     const_pins,
     PinMode,
     PinState,
-    REDIS_HOST,
-    REDIS_PORT,
-    REDIS_DB,
+    REDIS_URL
 )
 from app.domain.devices.interfaces import IDeviceStateManager
 
@@ -26,7 +24,7 @@ class DeviceState:
 
 class RedisDeviceStateManager(IDeviceStateManager):
     def __init__(self):
-        self.redis = Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
+        self.redis = from_url(REDIS_URL, decode_responses=True)
         self.devices: Dict[int, DeviceState] = {}
 
     async def preload(self):
