@@ -6,7 +6,6 @@ import { changeDeviceStatus } from "./utils.js";
 document.addEventListener("DOMContentLoaded", () => {
   const status = document.getElementById("connection_status");
   wsClient.onOpen = (ws) => {
-    status.innerText = "✅ Подключено к серверу";
     changeDeviceStatus(false);
     wsSender.authenticate("abc123");
     wsSender.get_report();
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  wsClient.onClose = () => {
-    status.innerText = "❌ Соединение закрыто. Переподключение...";
-  };
+  // wsClient.onClose = () => {
+  //
+  // };
 });
