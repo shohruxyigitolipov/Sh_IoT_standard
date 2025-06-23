@@ -1,286 +1,252 @@
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
 #include <ArduinoWebsockets.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+#include <TimeLib.h>
 #include <ArduinoJson.h>
 #include <map>
-#include <time.h>
 
 using namespace websockets;
 
-const char* ssid = "Galaxy";
+// ——— Wi-Fi настройки ————————————————————————
+const char* ssid     = "Galaxy";
 const char* password = "60533185";
-const char* websocket_url = "wss://shiotstandard-production.up.railway.app/devices/ws/1/connect";
-const char* auth_token = "abc123";
 
+// ——— WebSocket ————————————————————————————————
+const char* ws_url = "wss://shiotstandard-production.up.railway.app:443/devices/ws/1/connect";
 WebsocketsClient client;
+bool wsConnected = false;
+String auth_token = "{\"auth_token\":\"abc123\"}";
 
-unsigned long lastPing = 0;
-unsigned long lastTick = 0;
-unsigned long lastReconnectAttempt = 0;
+// ——— NTP (GMT+5 Узбекистан) ————————————————————
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 5 * 3600, 60000);
 
-struct PinSchedule {
-  String on_time;
-  String off_time;
+// ——— Пины ————————————————————————————————
+const int pinList[] = {4, 5, 12, 13, 14};
+
+struct PinConfig {
+  String mode = "manual";
+  String on_time = "12:00";
+  String off_time = "13:00";
 };
 
-std::map<int, PinSchedule> schedules;
-const int pins[] = {4, 5, 15, 16, 17, 18, 21, 22, 23};
-const int numPins = sizeof(pins) / sizeof(pins[0]);
+std::map<int, PinConfig> pins;
 
-const char* root_ca =
-"-----BEGIN CERTIFICATE-----\n"
-"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\n"
-"-----END CERTIFICATE-----\n";
-
-void setupPins() {
-  for (int i = 0; i < numPins; i++) {
-    pinMode(pins[i], OUTPUT);
-    digitalWrite(pins[i], LOW);
-  }
-}
-
-bool isValidTime(const String& t) {
-  if (t.length() != 5 || t.charAt(2) != ':') return false;
-  int hh = t.substring(0, 2).toInt();
-  int mm = t.substring(3, 5).toInt();
-  return (hh >= 0 && hh < 24 && mm >= 0 && mm < 60);
-}
-
-bool isWithinTimeRange(const String& now, const String& on, const String& off) {
-  // Поскольку строки в формате "HH:MM", лексикографическое сравнение корректно
-  if (!isValidTime(on) || !isValidTime(off) || !isValidTime(now)) return false;
-  if (on <= off) {
-    return (now >= on && now < off);
-  } else {
-    // Диапазон пересекает полночь
-    return (now >= on || now < off);
-  }
-}
-
-void syncTime() {
-  // Указываем смещение для Tashkent (UTC+5)
-  configTime(5 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-  Serial.print("Waiting for NTP time sync");
-  time_t now = time(nullptr);
-  unsigned long start = millis();
-  while (now < 24 * 3600) { // если время всё ещё близко к 0 (1970), ждём
-    if (millis() - start > 10000) { // таймаут 10 секунд
-      Serial.println(" failed (timeout)");
-      return;
-    }
-    delay(500);
-    Serial.print(".");
-    now = time(nullptr);
-  }
-  Serial.println(" done!");
-}
-
-void connectWebSocket() {
-  client.setCACert(root_ca);
-  if (client.connect(websocket_url)) {
-    Serial.println("WebSocket connected");
-    StaticJsonDocument<128> authDoc;
-    authDoc["auth_token"] = auth_token;
-    String auth_msg;
-    serializeJson(authDoc, auth_msg);
-    client.send(auth_msg);
-  } else {
-    Serial.println("WebSocket connection failed");
-  }
-}
-
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
+// ——— Подключение к Wi-Fi ————————————————————————
+void connectWiFi() {
   Serial.print("Connecting to Wi-Fi");
+  WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nWi-Fi connected");
-
-  setupPins();
-  syncTime();
-  connectWebSocket();
-
-  client.onMessage([](WebsocketsMessage msg) {
-    String payload = msg.data();
-    payload.trim();
-    if (payload.length() == 0 || payload.charAt(0) != '{') {
-      // Игнорируем пустые или не JSON-сообщения (ping/pong)
-      return;
-    }
-
-    lastTick = millis(); // Считаем, что получили сообщение, чтобы не переподключаться
-    StaticJsonDocument<512> doc;
-    DeserializationError err = deserializeJson(doc, payload);
-    if (err) {
-      Serial.print("JSON parse error: ");
-      Serial.println(err.c_str());
-      return;
-    }
-
-    const char* action = doc["action"];
-    int pin = doc["pin"] | -1;
-    int state = doc["state"] | -1;
-    String req_id = "";
-    if (doc.containsKey("request_id")) {
-      req_id = String(doc["request_id"].as<const char*>());
-    }
-
-    if (pin < 0) {
-      doc.clear();
-      return;
-    }
-
-    if (strcmp(action, "turn_on") == 0) {
-      digitalWrite(pin, HIGH);
-      Serial.print(pin);
-      Serial.println(" - HIGH");
-    }
-    else if (strcmp(action, "turn_off") == 0) {
-      digitalWrite(pin, LOW);
-      Serial.print(pin);
-      Serial.println(" - LOW");
-    }
-    else if (strcmp(action, "set_state") == 0) {
-      if (state >= 0) {
-        digitalWrite(pin, state ? HIGH : LOW);
-        Serial.print(pin);
-        Serial.print(" - manual state: ");
-        Serial.println(state);
-      }
-    }
-    else if (strcmp(action, "set_schedule") == 0) {
-      const char* on_time_c = doc["on_time"];
-      const char* off_time_c = doc["off_time"];
-      String on_time(on_time_c);
-      String off_time(off_time_c);
-      if (isValidTime(on_time) && isValidTime(off_time)) {
-        schedules[pin] = {on_time, off_time};
-        Serial.print("Schedule set for pin ");
-        Serial.print(pin);
-        Serial.print(": ");
-        Serial.print(on_time);
-        Serial.print(" - ");
-        Serial.println(off_time);
-      } else {
-        Serial.print("Invalid schedule format for pin ");
-        Serial.println(pin);
-      }
-    }
-    else if (strcmp(action, "set_manual") == 0) {
-      if (schedules.count(pin)) {
-        schedules.erase(pin);
-        Serial.print("Manual mode enabled for pin ");
-        Serial.println(pin);
-      }
-      if (state >= 0) {
-        digitalWrite(pin, state ? HIGH : LOW);
-        Serial.print("Pin ");
-        Serial.print(pin);
-        Serial.print(" set manual state: ");
-        Serial.println(state);
-      }
-    }
-
-    // Формируем ответ
-    doc.clear();
-    doc["pin"] = pin;
-    doc["status"] = digitalRead(pin);
-    if (req_id.length() > 0) {
-      doc["request_id"] = req_id;
-    }
-    String response;
-    serializeJson(doc, response);
-    client.send(response);
-  });
+  Serial.println(" connected!");
 }
 
-void handlePing() {
-  if (millis() - lastPing > 10000) {
-    // Отправляем текстовый ping - сервер должен на него ответить
-    client.send("ping");
-    lastPing = millis();
+// ——— Синхронизация времени ————————————————————————
+void syncTime() {
+  if (timeClient.update()) {
+    setTime(timeClient.getEpochTime());
+    Serial.print("Time: ");
+    Serial.println(timeClient.getFormattedTime());
   }
 }
+void sendReport(int pin = -1) {
 
-void handleSchedule() {
-  if (millis() - lastTick > 1000) {
-    lastTick = millis();
-    time_t rawtime;
-    struct tm* timeinfo;
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
+  StaticJsonDocument<512> doc;
+  doc["type"] = "report";
+  JsonArray pin_list = doc.createNestedArray("pin_list");
 
-    char currentTime[6];
-    sprintf(currentTime, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
-    String nowStr(currentTime);
+  if (pin == -1) {
+    // Отправить все пины
+    for (auto& entry : pins) {
+      int p = entry.first;
+      PinConfig& cfg = entry.second;
 
-    for (auto const& pair : schedules) {
-      int pin = pair.first;
-      String on_time = pair.second.on_time;
-      String off_time = pair.second.off_time;
-      if (isWithinTimeRange(nowStr, on_time, off_time)) {
-        digitalWrite(pin, HIGH);
-      } else {
-        digitalWrite(pin, LOW);
-      }
+      JsonObject item = pin_list.createNestedObject();
+      item["pin"] = p;
+      item["state"] = digitalRead(pin);
+      item["mode"] = cfg.mode;
+      item["schedule"]["on_time"] = cfg.on_time;
+      item["schedule"]["off_time"] = cfg.off_time;
+    }
+  } else {
+    // Только один пин
+    if (pins.count(pin)) {
+      PinConfig& cfg = pins[pin];
+      JsonObject item = pin_list.createNestedObject();
+      item["pin"] = pin;
+      item["state"] = digitalRead(pin);
+      item["mode"] = cfg.mode;
+      item["schedule"]["on_time"] = cfg.on_time;
+      item["schedule"]["off_time"] = cfg.off_time;
     }
   }
+
+  String jsonStr;
+  serializeJson(doc, jsonStr);
+
+  client.send(jsonStr);
+  Serial.print("To WS: ");Serial.println(jsonStr);
 }
 
-void handleReconnect() {
-  // Попытка переподключения раз в 5 секунд
-  if (millis() - lastReconnectAttempt < 5000) return;
-  lastReconnectAttempt = millis();
 
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Wi-Fi disconnected. Reconnecting...");
-    WiFi.disconnect();
-    WiFi.begin(ssid, password);
+// ——— Обработка входящих команд ————————————————————
+void handleCommand(const String& msg) {
+  StaticJsonDocument<512> doc;
+  DeserializationError err = deserializeJson(doc, msg);
+  if (err) {
+    Serial.print("JSON parse error: ");
+    Serial.println(err.c_str());
     return;
   }
 
-  if (!client.available()) {
-    Serial.println("WebSocket disconnected. Reconnecting...");
-    connectWebSocket();
+  const char* action = doc["action"];
+  if (!action) return;
+
+  int pin = doc["pin"] | -1;
+
+  if (strcmp(action, "set_state") == 0 && pin != -1) {
+    int state = doc["state"];
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, state);
+    Serial.printf("Pin %d set to %d\n", pin, state);
+    sendReport(pin);
+  }
+  else if (strcmp(action, "set_mode") == 0 && pin != -1) {
+    String mode = doc["mode"] | "manual";
+    pins[pin].mode = mode;
+    Serial.printf("Pin %d mode set to %s\n", pin, mode.c_str());
+    sendReport(pin);
+  }
+  else if (strcmp(action, "set_schedule") == 0 && pin != -1) {
+    pins[pin].on_time = doc["schedule"]["on_time"] | "12:00";
+    pins[pin].off_time = doc["schedule"]["off_time"] | "13:00";
+    Serial.printf("Pin %d schedule updated\n", pin);
+    sendReport(pin);
+  }
+  else if (strcmp(action, "report") == 0) {
+    sendReport();
   }
 }
 
+// ——— Настройка WebSocket ————————————————————————
+void setupWebsocket() {
+  client.onEvent([](WebsocketsEvent evt, String data) {
+    switch (evt) {
+      case WebsocketsEvent::ConnectionOpened:
+        Serial.println("WS connected");
+        wsConnected = true;
+        break;
+      case WebsocketsEvent::ConnectionClosed:
+        Serial.println("WS disconnected");
+        wsConnected = false;
+        break;
+      default: break;
+    }
+  });
+
+  client.onMessage([](WebsocketsMessage msg) {
+  String data = msg.data();
+  Serial.print("WS msg: ");
+  Serial.println(data);
+
+  // 🔁 ping-поддержка
+  if (data == "ping") {
+    client.send("pong");
+    Serial.println("🔁 Received ping → sent pong");
+    return;
+  }
+
+  handleCommand(data);
+});
+
+
+  Serial.print("Connecting WS… ");
+  if (client.connect(ws_url)) {
+    Serial.println("OK");
+    client.send(auth_token);
+  } else {
+    Serial.println("Failed");
+  }
+}
+
+// ——— setup() ————————————————————————————————————————
+void setup() {
+  Serial.begin(115200);
+  connectWiFi();
+  syncTime();
+
+  for (int pin : pinList) {
+    pins[pin] = PinConfig();  // default
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, 0);
+  }
+
+  setupWebsocket();
+}
+
+// ——— loop() ———————————————————————————————————————————
 void loop() {
-  if (client.available()) {
-    client.poll();
-  }
-  handlePing();
-  handleSchedule();
-  handleReconnect();
-}
+  client.poll();
 
+  static unsigned long lastSync = 0;
+  if (millis() - lastSync > 60000) {
+    syncTime();
+    lastSync = millis();
+  }
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wi-Fi lost, reconnecting...");
+    connectWiFi();
+    syncTime();
+  }
+
+  if (!wsConnected) {
+    Serial.println("Reconnecting WS…");
+    if (client.connect(ws_url)) {
+      Serial.println("WS reconnected");
+      client.send(auth_token);
+    } else {
+      Serial.println("WS reconnect failed");
+    }
+  }
+
+  // 🔁 Автоматическое управление по расписанию
+  static unsigned long lastScheduleCheck = 0;
+  if (millis() - lastScheduleCheck > 1000) {
+    lastScheduleCheck = millis();
+
+    int currentHour = hour();
+    int currentMinute = minute();
+    int nowMins = currentHour * 60 + currentMinute;
+
+    for (auto& entry : pins) {
+      int pin = entry.first;
+      PinConfig& cfg = entry.second;
+
+      if (cfg.mode != "auto") continue;
+
+      int onH, onM, offH, offM;
+      sscanf(cfg.on_time.c_str(), "%d:%d", &onH, &onM);
+      sscanf(cfg.off_time.c_str(), "%d:%d", &offH, &offM);
+
+      int onMins = onH * 60 + onM;
+      int offMins = offH * 60 + offM;
+
+      bool isOn = (onMins < offMins)
+                    ? (nowMins >= onMins && nowMins < offMins)
+                    : (nowMins >= onMins || nowMins < offMins);
+
+      int newState = isOn ? 1 : 0;
+
+      if (newState != cfg.state) {
+        cfg.state = newState;
+        digitalWrite(pin, newState);
+        Serial.printf("Auto control: Pin %d set to %d\n", pin, newState);
+        sendReport();
+      }
+    }
+  }
+}
