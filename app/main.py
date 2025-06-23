@@ -6,7 +6,7 @@ from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from app.config import LoggingSettings, HOST, WS_PROTOCOL, device_run
+from app.config import LoggingSettings, HOST, WS_PROTOCOL, DEVICE_RUN
 from device_client.main import run_device
 from telegram_client.bot import run_telegram_bot
 from app.interface.device.routers import router as device_rt
@@ -25,7 +25,8 @@ def get_logger(name: str = __name__) -> logging.Logger:
 async def lifespan(app: FastAPI):
     loop = asyncio.get_event_loop()
     loop.create_task(run_telegram_bot())
-    loop.create_task(run_device())
+    if DEVICE_RUN:
+        loop.create_task(run_device())
     yield
 
 
@@ -38,4 +39,4 @@ templates = Jinja2Templates(directory='web_client')
 
 @app.get('/', response_class=HTMLResponse)
 async def welcome(request: Request):
-    return templates.TemplateResponse('index.html', {'request': request, 'host': HOST})
+    return templates.TemplateResponse('index.html', {'request': request, 'host': HOST, 'ws_protocol': WS_PROTOCOL})
