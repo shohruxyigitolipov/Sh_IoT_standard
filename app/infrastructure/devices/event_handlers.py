@@ -1,7 +1,7 @@
 import json
 from fastapi import WebSocket
 from app.config import event_bus
-from app.infrastructure.devices.in_memory_state import device_state
+from app.infrastructure.devices.redis_state import device_state
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 
@@ -42,7 +42,7 @@ async def handle_message_from_device(device_id: int, message: str):
                 off_time=schedule.get('off_time')
             )
             await device_state.set_name(device_id, pin=pin.get('pin'), name=pin.get('name', None))
-
+        await device_state.save_report(device_id, message)
         await web_ws_manager.send_personal(device_id, data=message)
 
 
