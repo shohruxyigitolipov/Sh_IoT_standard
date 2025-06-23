@@ -15,7 +15,7 @@ async def handle_connection(device_id, ws: WebSocket):
 @event_bus.on('web_ws_disconnected')
 async def handle_disconnection(device_id):
     await web_ws_manager.remove(device_id)
-
+#
 
 @event_bus.on('message_from_web_ws')
 async def handle_message_from_device(device_id, data):
