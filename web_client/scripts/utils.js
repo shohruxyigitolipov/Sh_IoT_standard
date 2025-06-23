@@ -9,8 +9,5 @@ export function changeDeviceStatus(status, render) {
         }
     } else {
         deviceStatus.innerText = "Устройство не активно";
-
-        const container = document.getElementById("pins_container");
-        container.innerHTML = '';
     }
 }
