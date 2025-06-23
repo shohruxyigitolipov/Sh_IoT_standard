@@ -23,6 +23,6 @@ async def handle_message_from_device(device_id, data):
     if not action:
         return
     if action == 'get_report':
-        await web_ws_manager.send_personal(device_id, data=await device_state.get_report())
+        await web_ws_manager.send_personal(device_id, data=await device_state.get_report(device_id))
     else:
         await device_ws_manager.send_personal(device_id, data=data)
