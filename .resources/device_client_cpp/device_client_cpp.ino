@@ -42,14 +42,14 @@ void loop() {
     timeManager.sync();
     lastTimeSync = now;
   }
+    if (pinController.isInitialized() && now - lastScheduleCheck > 1000) {
+      auto changedPins = pinController.handleAutoLogic();
+      if (!changedPins.empty()) {
+          wsManager.send(pinController.generateReport());
+      }
+      lastScheduleCheck = now;
+    }
 
-  if (now - lastScheduleCheck > 1000) {
-  auto changedPins = pinController.handleAutoLogic();
-  for (int pin : changedPins) {
-    wsManager.send(pinController.generateReport(pin));  // отправка отчёта по каждому
-  }
-  lastScheduleCheck = now;
-}
 
 
   if (!wsManager.isConnected()) {

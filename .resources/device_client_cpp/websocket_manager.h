@@ -41,10 +41,10 @@ public:
                 client.send("pong");
                 return;
             }
-
-            int changedPin = pinController.handleCommand(data);
-            String report = pinController.generateReport(changedPin);
-            client.send(report);
+            int result = pinController.handleCommand(data);
+            if (result != -2) {
+            client.send(pinController.generateReport());
+}
         });
 
         if (client.connect(wsUrl)) {

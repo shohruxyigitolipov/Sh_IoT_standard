@@ -25,6 +25,7 @@ public:
 
     std::vector<int> handleAutoLogic() {
     std::vector<int> changedPins;
+    
     int nowMinutes = hour() * 60 + minute();
 
     for (auto& [pin, cfg] : pinMap) {
@@ -56,31 +57,45 @@ public:
     int handleCommand(const String& msg) {
     StaticJsonDocument<512> doc;
     DeserializationError err = deserializeJson(doc, msg);
-    if (err) return -1;
+    if (err) return -2;
 
     const char* action = doc["action"];
-    if (!action) return -1;
+    if (!action) return -2;
 
     int pin = doc["pin"] | -1;
 
     if (strcmp(action, "set_state") == 0 && pin != -1) {
         int state = doc["state"];
         applyState(pin, state);
-        return pin;
+        return -1;
     }
     else if (strcmp(action, "set_mode") == 0 && pin != -1) {
         setMode(pin, doc["mode"] | "manual");
-        return pin;
+        return -1;
     }
     else if (strcmp(action, "set_schedule") == 0 && pin != -1) {
         setSchedule(pin, doc["schedule"]["on_time"] | "12:00", doc["schedule"]["off_time"] | "13:00");
-        return pin;
+        return -1;
+    }
+    else if (strcmp(action, "init_state") == 0) {
+            JsonArray pins = doc["pin_list"].as<JsonArray>();
+            for (JsonObject pinObj : pins) {
+                int p = pinObj["pin"];
+                if (pinMap.count(p)) {
+                    setMode(p, pinObj["mode"] | "manual");
+                    setSchedule(p, pinObj["schedule"]["on_time"] | "12:00",
+                                pinObj["schedule"]["off_time"] | "13:00");
+                }
+            }
+            initialized = true;
+            Serial.println("✅ Устройство синхронизировано с сервера");
+            return -1;
     }
     else if (strcmp(action, "report") == 0) {
         return -1;  // → репорт на все
     }
 
-    return -1;
+    return -2;
 }
 
     void applyState(int pin, int state) {
@@ -105,28 +120,29 @@ public:
             Serial.printf("Pin %d schedule set %s - %s\n", pin, on.c_str(), off.c_str());
         }
     }
+String generateReport() const {
+    StaticJsonDocument<512> doc;
+    doc["type"] = "report";
+    JsonArray list = doc.createNestedArray("pin_list");
 
-
-    String generateReport(int pin = -1) const {
-        StaticJsonDocument<512> doc;
-        doc["type"] = "report";
-        JsonArray list = doc.createNestedArray("pin_list");
-
-        if (pin == -1) {
-            for (auto& [p, cfg] : pinMap) addToReport(list, p, cfg);
-        } else if (pinMap.count(pin)) {
-            addToReport(list, pin, pinMap.at(pin));
-        }
-
-        String result;
-        serializeJson(doc, result);
-        Serial.println(result);
-        return result;
+    for (auto& [p, cfg] : pinMap) {
+        addToReport(list, p, cfg);
     }
+
+    String result;
+    serializeJson(doc, result);
+    Serial.println(result);
+    return result;
+}
+bool isInitialized() const {
+    return initialized;
+}
+
+
 
 private:
     std::map<int, PinConfig> pinMap;
-
+    bool initialized = false; 
     static void addToReport(JsonArray& arr, int pin, const PinConfig& cfg) {
         JsonObject obj = arr.createNestedObject();
         obj["pin"] = pin;
