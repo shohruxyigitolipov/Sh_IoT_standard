@@ -3,7 +3,7 @@ import datetime
 import json
 from typing import Literal, Dict, cast
 
-from device_client.logger_config import get_logger
+from .logger_config import get_logger
 
 logger = get_logger("device_client")
 

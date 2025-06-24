@@ -4,8 +4,8 @@ from app.config import BOT_TOKEN
 import pytz
 from datetime import datetime
 
-from telegram_client.routers import user_rt
-from telegram_client.logger_config import get_logger
+from .routers import user_rt
+from .logger_config import get_logger
 
 logger = get_logger()
 

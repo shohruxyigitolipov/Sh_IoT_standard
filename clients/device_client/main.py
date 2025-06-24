@@ -3,10 +3,10 @@ import asyncio
 import websockets
 from pyee.asyncio import AsyncIOEventEmitter
 from dotenv import load_dotenv
-from device_client.device import DeviceImitator
+from .device import DeviceImitator
 import os
 
-from device_client.logger_config import get_logger
+from .logger_config import get_logger
 
 logger = get_logger("device_client")
 
