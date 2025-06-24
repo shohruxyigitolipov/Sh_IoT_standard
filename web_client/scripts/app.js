@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.type === "report") {
         renderPins(data, ws);
       } else if (data.type === "device_status") {
-        changeDeviceStatus(data.status, true);
+        changeDeviceStatus(data.status);
       }
     } catch (err) {
       console.error("Ошибка парсинга JSON:", err);

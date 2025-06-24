@@ -7,7 +7,6 @@ from datetime import datetime
 from telegram_client.routers import user_rt
 
 default = DefaultBotProperties(parse_mode='MARKDOWN')
-print(BOT_TOKEN)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
