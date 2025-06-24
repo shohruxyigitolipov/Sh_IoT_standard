@@ -1,7 +1,7 @@
 from starlette.websockets import WebSocket
 
 from app.config import event_bus
-from app.infrastructure.devices.redis_state import device_state
+from app.application.devices.redis_state import device_state
 from app.infrastructure.devices.ws_manager import device_ws_manager
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
 

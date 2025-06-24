@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from starlette.responses import HTMLResponse
@@ -13,7 +12,7 @@ from app.interface.device.routers import router as device_rt
 from app.interface.web.routers import router as web_interface_rt
 from app.infrastructure.logger_module.config import LoggingConfig
 from app.infrastructure.logger_module.utils import get_logger_factory
-from app.infrastructure.devices.redis_state import device_state
+from app.application.devices.redis_state import device_state
 
 settings = LoggingSettings()  # прочитает .env автоматически
 LoggingConfig(settings).setup()
