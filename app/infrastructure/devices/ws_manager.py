@@ -15,21 +15,21 @@ class DeviceWebSocketManager:
 
     async def add(self, device_id: int, ws: WebSocket):
         self.active[device_id] = ws
-        event_bus.emit('device_status', device_id, True)
 
     async def remove(self, device_id: int):
         try:
             await self.active.pop(device_id, None).close()
         except Exception as e:
             pass
-        event_bus.emit('device_status', device_id, False)
 
     async def send_personal(self, device_id: int, data: str | dict) -> dict | None | bool:
         ws = self.active.get(device_id)
         if ws:
+            logger.debug(f'Send to device {device_id}: {data}')
             await ws.send_json(data)
         else:
-            event_bus.emit('message_failed', device_id, data)
+            logger.warning(f'Failed to send to device {device_id}: {data}')
+            event_bus.emit('device_message_failed', device_id, data)
 
 
 device_ws_manager = DeviceWebSocketManager()

@@ -10,7 +10,6 @@ from device_client.logger_config import get_logger
 
 logger = get_logger("device_client")
 
-device = DeviceImitator()
 load_dotenv()
 host = os.getenv('HOST')
 
@@ -20,16 +19,13 @@ auth_token = 'abc123'
 
 RECONNECT_DELAY = 3
 
-global ws_connection
-
 
 # ------------------------------
 async def websocket_client():
-    global ws_connection
     while True:
         try:
             logger.info("Connecting to server...")
-            async with websockets.connect(f"ws://{host}/devices/ws/2/connect") as websocket:
+            async with websockets.connect(f"ws://{host}/devices/ws/1/connect") as websocket:
                 logger.info("WebSocket connected")
                 await websocket.send(json.dumps({'auth_token': auth_token}))
 
@@ -93,6 +89,8 @@ async def handle_message(data, ws):
 
 
 async def run_device():
+    global device
+    device = DeviceImitator()
     logger.info("Device client starting")
     await asyncio.sleep(5)
     await asyncio.gather(websocket_client(), device.start())

@@ -5,6 +5,10 @@ from fastapi.websockets import WebSocket, WebSocketDisconnect
 
 from app.config import event_bus
 from app.infrastructure.web_interface.ws_manager import web_ws_manager
+from app.infrastructure.logger_module.utils import get_logger_factory
+
+get_logger = get_logger_factory(__name__)
+logger = get_logger()
 
 
 async def verify_auth_token(token):
@@ -20,7 +24,7 @@ class WebClientWebSocketSession:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
         event_bus.emit('web_ws_connected', device_id, websocket)
-        print('web_ws_connected')
+        logger.info('web_ws_connected')
         await web_ws_manager.add(device_id=device_id, ws=websocket)
         await self._listen(websocket, device_id)
 
@@ -42,6 +46,9 @@ class WebClientWebSocketSession:
                 data = await websocket.receive_json()
                 event_bus.emit('message_from_web_ws', device_id, data)
         except WebSocketDisconnect:
+            event_bus.emit('web_ws_disconnected', device_id)
+        except Exception as e:
+            logger.exception(f'Error in web ws session {device_id}: {e}')
             event_bus.emit('web_ws_disconnected', device_id)
 
 

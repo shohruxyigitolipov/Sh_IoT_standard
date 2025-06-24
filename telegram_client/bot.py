@@ -5,9 +5,11 @@ import pytz
 from datetime import datetime
 
 from telegram_client.routers import user_rt
+from telegram_client.logger_config import get_logger
+
+logger = get_logger()
 
 default = DefaultBotProperties(parse_mode='MARKDOWN')
-print(BOT_TOKEN)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
@@ -23,4 +25,5 @@ def setup_timezone():
 
 async def run_telegram_bot():
     setup_routers()
+    logger.info("Telegram bot starting")
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
