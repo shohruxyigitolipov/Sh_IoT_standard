@@ -31,4 +31,4 @@ class TelegramLogHandler(logging.Handler):
             }
             requests.post(self.api_url, data=payload, timeout=3)
         except Exception as e:
-            error_logger.error(f"[TelegramLogHandler] Ошибка: {e}")
+            error_logger.error(f"[TelegramLogHandler] Error: {e}")
