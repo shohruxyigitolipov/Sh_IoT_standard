@@ -20,9 +20,14 @@ async def handle_disconnection(device_id):
 @event_bus.on('message_from_web_ws')
 async def handle_message_from_device(device_id, data):
     action = data.get('action')
-    if not action:
-        return
-    if action == 'get_report':
-        await web_ws_manager.send_personal(device_id, data=await device_state.get_report(device_id))
-    else:
-        await device_ws_manager.send_personal(device_id, data=data)
+    
+    match action:
+        case 'get_report':
+            await web_ws_manager.send_personal(device_id, data=await device_state.get_report(device_id))
+        case 'set_pin_name', pin, name:
+            await device_state.set_name(device_id, pin, name)
+            await device_state.save_report(device_id)
+        case None:
+            pass
+        case _:
+            await device_ws_manager.send_personal(device_id, data=data)

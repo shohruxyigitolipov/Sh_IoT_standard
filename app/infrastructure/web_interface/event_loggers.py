@@ -13,7 +13,7 @@ logger = get_logger()
 @event_bus.on('web_ws_connected')
 async def handle_connection(device_id, ws: WebSocket):
     logger.info(f'{[device_id]} Веб-интерфейс подключен')
-    await ws.send_json(json.dumps({'message': 'Вы подключились'}))
+    await ws.send_json({'message': 'Вы подключились'})
 
 
 @event_bus.on('web_ws_disconnected')

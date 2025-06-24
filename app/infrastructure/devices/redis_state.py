@@ -40,7 +40,8 @@ class RedisDeviceStateManager(IDeviceStateManager):
             device_id = int(key.split(":")[1])
             self.devices[device_id] = self._state_from_report(data)
 
-    async def save_report(self, device_id: int, report: dict):
+    async def save_report(self, device_id: int):
+        report = await self.get_report(device_id)
         await self.redis.set(f"device:{device_id}", json.dumps(report))
 
     async def _get_device(self, device_id: int) -> DeviceState:
@@ -109,7 +110,6 @@ class RedisDeviceStateManager(IDeviceStateManager):
         return device.pin_schedule.get(pin, {})
 
     async def get_report(self, device_id: int, pin: int | None = None):
-        device = await self._get_device(device_id)
         if not pin:
             pin_list = list(const_pins)
         else:

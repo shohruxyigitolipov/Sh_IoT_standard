@@ -24,7 +24,6 @@ class DeviceWebSocketSession:
             await asyncio.sleep(3)
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-        event_bus.emit("device_status", device_id, True)
         event_bus.emit('device_ws_connected', device_id, websocket)
         await device_ws_manager.add(device_id, websocket)
 
@@ -59,7 +58,6 @@ class DeviceWebSocketSession:
 
             if last is None or (now - last > 10):
                 print(f"[PING] No pong from {device_id} for >10s")
-                event_bus.emit("device_status", device_id, False)
                 event_bus.emit("device_ws_disconnected", device_id)
                 await device_ws_manager.remove(device_id)
                 break
@@ -74,7 +72,6 @@ class DeviceWebSocketSession:
                     device_last_pong[device_id] = time.monotonic()
                     continue
                 event_bus.emit("message_from_device", device_id, msg)
-
         except (asyncio.CancelledError, WebSocketDisconnect, Exception):
             event_bus.emit("device_ws_disconnected", device_id)
             await device_ws_manager.remove(device_id)

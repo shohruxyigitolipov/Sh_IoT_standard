@@ -40,7 +40,6 @@ async def handle_auth_token_wrong(device_id):
     logger.debug(f'[{device_id}], Неверный auth_token')
 
 
-@event_bus.on('message_failed')
+@event_bus.on('device_message_failed')
 async def handle_message_failed(device_id, message):
     logger.debug(f"[{device_id}], Сообщение: {message} возможно не дошло")
-    # raise RuntimeError(f'Websocket for device {device_id} not found')
