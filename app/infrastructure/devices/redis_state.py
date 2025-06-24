@@ -40,9 +40,10 @@ class RedisDeviceStateManager(IDeviceStateManager):
             device_id = int(key.split(":")[1])
             self.devices[device_id] = self._state_from_report(data)
 
-    async def save_report(self, device_id: int):
+    async def save_report(self, device_id: int) -> dict:
         report = await self.get_report(device_id)
         await self.redis.set(f"device:{device_id}", json.dumps(report))
+        return report
 
     async def _get_device(self, device_id: int) -> DeviceState:
         if device_id not in self.devices:
@@ -97,19 +98,19 @@ class RedisDeviceStateManager(IDeviceStateManager):
         device = await self._get_device(device_id)
         return device.pin_names.get(pin)
 
-    async def get_mode(self, device_id: int, pin: int) -> Literal["manual", "auto"] | None:
+    async def get_mode(self, device_id: int, pin: int) -> PinMode | None:
         device = await self._get_device(device_id)
         return device.pin_modes.get(pin)
 
-    async def get_state(self, device_id: int, pin: int) -> PinState:
+    async def get_state(self, device_id: int, pin: int) -> PinState | None:
         device = await self._get_device(device_id)
         return device.pin_state.get(pin)
 
-    async def get_schedule(self, device_id: int, pin: int) -> Dict[str, str]:
+    async def get_schedule(self, device_id: int, pin: int) -> dict:
         device = await self._get_device(device_id)
         return device.pin_schedule.get(pin, {})
 
-    async def get_report(self, device_id: int, pin: int | None = None):
+    async def get_report(self, device_id: int, pin: int | None = None) -> dict:
         if not pin:
             pin_list = list(const_pins)
         else:

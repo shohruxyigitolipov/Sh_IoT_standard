@@ -44,8 +44,8 @@ async def handle_message_from_device(device_id: int, message: str):
             )
             await device_state.set_name(device_id, pin=pin.get('pin'), name=pin.get('name', None))
 
-        await device_state.save_report(device_id)
-        await web_ws_manager.send_personal(device_id, data=message)
+        report = await device_state.save_report(device_id)
+        await web_ws_manager.send_personal(device_id, data=report)
 
 
 @event_bus.on('device_status')
