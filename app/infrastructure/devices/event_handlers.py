@@ -8,6 +8,7 @@ from app.infrastructure.web_interface.ws_manager import web_ws_manager
 @event_bus.on('device_ws_connected')
 async def handle_connection(device_id, ws: WebSocket):
     await ws.send_json({'message': 'Вы подключились'})
+    await ws.send_json(await device_state.get_init_state(device_id))
     event_bus.emit('device_status', device_id, True)
 
 
