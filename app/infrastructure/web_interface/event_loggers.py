@@ -1,8 +1,6 @@
 import json
-
 from fastapi import WebSocket
 from app.config import event_bus
-from app.infrastructure.devices.ws_manager import device_ws_manager
 from app.infrastructure.logger_module.utils import get_logger_factory
 
 get_logger = get_logger_factory('Web Interface')

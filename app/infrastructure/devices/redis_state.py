@@ -9,8 +9,8 @@ from app.config import (
     const_pins,
     PinMode,
     PinState,
-    REDIS_URL
-)
+    REDIS_URL)
+
 from app.domain.devices.interfaces import IDeviceStateManager
 
 
@@ -128,6 +128,11 @@ class RedisDeviceStateManager(IDeviceStateManager):
         payload = {"type": "report", "pin_list": report_data}
         return payload
 
+    async def get_init_state(self, device_id: int) -> dict:
+        report = await self.get_report(device_id)
+        report["action"] = "init_state"
+        report.pop("type", None)
+        return report
+
 
 device_state = RedisDeviceStateManager()
-
