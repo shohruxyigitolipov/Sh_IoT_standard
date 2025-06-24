@@ -8,13 +8,19 @@ from app.infrastructure.web_interface.ws_manager import web_ws_manager
 
 @event_bus.on('web_ws_connected')
 async def handle_connection(device_id, ws: WebSocket):
+    await ws.send_json({'message': 'Вы подключились'})
     status = device_id in device_ws_manager.active
     event_bus.emit('device_status', device_id, status)
 
 
-@event_bus.on('web_ws_disconnected')
-async def handle_disconnection(device_id):
-    await web_ws_manager.remove(device_id)
+@event_bus.on('web_ws_wrong_auth_token')
+async def handle_web_wrong_auth_token(ws: WebSocket):
+    await ws.send_json({'message': 'Неверный auth_token'})
+
+
+@event_bus.on('web_ws_timeout')
+async def handle_timeout(ws: WebSocket):
+    await ws.send_json({'message': 'Время ожидания истекло!'})
 
 
 @event_bus.on('message_from_web_ws')

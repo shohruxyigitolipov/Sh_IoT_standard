@@ -9,6 +9,6 @@ router = APIRouter(prefix='/devices')
 
 
 @router.websocket('/ws/{device_id}/connect')
-async def device_websocket_handler(websocket: WebSocket, device_id: int):
-    await websocket.accept()
-    await device_ws_session.handle(websocket=websocket, device_id=device_id)
+async def device_websocket_handler(ws: WebSocket, device_id: int):
+    await ws.accept()
+    await device_ws_session.handle(ws=ws, device_id=device_id)

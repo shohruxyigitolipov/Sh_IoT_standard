@@ -17,39 +17,37 @@ async def verify_auth_token(token):
 
 
 class WebClientWebSocketSession:
-    async def handle(self, websocket: WebSocket, device_id: int):
-        if not await self._authenticate(websocket):
-            event_bus.emit('web_ws_wrong_auth_token', websocket)
+    async def handle(self, ws: WebSocket, device_id: int):
+        if not await self._authenticate(ws):
+            event_bus.emit('web_ws_wrong_auth_token', ws)
             await asyncio.sleep(3)
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            await ws.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-        event_bus.emit('web_ws_connected', device_id, websocket)
-        logger.info('web_ws_connected')
-        await web_ws_manager.add(device_id=device_id, ws=websocket)
-        await self._listen(websocket, device_id)
+        await web_ws_manager.add(device_id=device_id, ws=ws)
+        await self._listen(ws, device_id)
 
     @staticmethod
-    async def _authenticate(websocket: WebSocket) -> bool:
+    async def _authenticate(ws: WebSocket) -> bool:
         try:
-            data = await asyncio.wait_for(websocket.receive_json(), timeout=15)
+            data = await asyncio.wait_for(ws.receive_json(), timeout=15)
         except asyncio.TimeoutError:
-            event_bus.emit('web_ws_timeout', websocket)
+            event_bus.emit('web_ws_timeout', ws)
             return False
         token = data.get('auth_token', None)
         verified = await verify_auth_token(token)
         return verified
 
     @staticmethod
-    async def _listen(websocket: WebSocket, device_id: int):
+    async def _listen(ws: WebSocket, device_id: int):
         try:
             while True:
-                data = await websocket.receive_json()
+                data = await ws.receive_json()
                 event_bus.emit('message_from_web_ws', device_id, data)
         except WebSocketDisconnect:
-            event_bus.emit('web_ws_disconnected', device_id)
+            web_ws_manager.remove(device_id)
         except Exception as e:
-            logger.exception(f'Error in web ws session {device_id}: {e}')
-            event_bus.emit('web_ws_disconnected', device_id)
+            logger.exception(f'[{device_id}] Error in web ws session: {e}')
+            web_ws_manager.remove(device_id)
 
 
 web_ws_session = WebClientWebSocketSession()
