@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, field
-from typing import Dict, Literal
+from typing import Dict
 
 from redis.asyncio import from_url
 
