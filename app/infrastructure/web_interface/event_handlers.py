@@ -24,8 +24,8 @@ async def handle_message_from_device(device_id, data):
     match action:
         case 'get_report':
             await web_ws_manager.send_personal(device_id, data=await device_state.get_report(device_id))
-        case 'set_pin_name', pin, name:
-            await device_state.set_name(device_id, pin, name)
+        case 'set_pin_name':
+            await device_state.set_name(device_id, data.get('pin'), data.get('name'))
             await device_state.save_report(device_id)
         case None:
             pass
