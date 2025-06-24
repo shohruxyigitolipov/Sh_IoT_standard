@@ -12,24 +12,28 @@ from telegram_client.bot import run_telegram_bot
 from app.interface.device.routers import router as device_rt
 from app.interface.web.routers import router as web_interface_rt
 from app.infrastructure.logger_module.config import LoggingConfig
+from app.infrastructure.logger_module.utils import get_logger_factory
 from app.infrastructure.devices.redis_state import device_state
 
 settings = LoggingSettings()  # прочитает .env автоматически
 LoggingConfig(settings).setup()
 
-
-def get_logger(name: str = __name__) -> logging.Logger:
-    return logging.getLogger(name)
+get_logger = get_logger_factory("server")
+logger = get_logger()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Server starting")
     loop = asyncio.get_event_loop()
     loop.create_task(run_telegram_bot())
     if DEVICE_RUN:
         loop.create_task(run_device())
     await device_state.preload()
-    yield
+    try:
+        yield
+    finally:
+        logger.info("Server stopped")
 
 
 app = FastAPI(lifespan=lifespan)

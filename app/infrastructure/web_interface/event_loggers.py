@@ -43,4 +43,4 @@ async def handle_web_wrong_auth_token(ws: WebSocket):
 
 @event_bus.on('message_from_web_ws')
 async def handle_message_from_device(device_id, message):
-    print(f'[{device_id}] message from web: {message}')
+    logger.info(f'[{device_id}] message from web: {message}')

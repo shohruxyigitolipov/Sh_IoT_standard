@@ -10,10 +10,12 @@ class LoggingConfig:
     def setup(self) -> None:
         formatters = {
             "standard": {
-                "format": self.settings.formatter
+                "format": self.settings.formatter,
+                "datefmt": "%Y-%m-%d %H:%M:%S",
             },
             "telegram": {
-                "format": self.settings.telegram_formatter
+                "format": self.settings.telegram_formatter,
+                "datefmt": "%Y-%m-%d %H:%M:%S",
             }
         }
 

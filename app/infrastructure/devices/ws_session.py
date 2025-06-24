@@ -57,7 +57,7 @@ class DeviceWebSocketSession:
             now = time.monotonic()
 
             if last is None or (now - last > 10):
-                print(f"[PING] No pong from {device_id} for >10s")
+                logger.warning(f"[PING] No pong from {device_id} for >10s")
                 event_bus.emit("device_ws_disconnected", device_id)
                 await device_ws_manager.remove(device_id)
                 break
@@ -72,7 +72,11 @@ class DeviceWebSocketSession:
                     device_last_pong[device_id] = time.monotonic()
                     continue
                 event_bus.emit("message_from_device", device_id, msg)
-        except (asyncio.CancelledError, WebSocketDisconnect, Exception):
+        except (asyncio.CancelledError, WebSocketDisconnect):
+            event_bus.emit("device_ws_disconnected", device_id)
+            await device_ws_manager.remove(device_id)
+        except Exception as e:
+            logger.exception(f"Device WS error {device_id}: {e}")
             event_bus.emit("device_ws_disconnected", device_id)
             await device_ws_manager.remove(device_id)
 
