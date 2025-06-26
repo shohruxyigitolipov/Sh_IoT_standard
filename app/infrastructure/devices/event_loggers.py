@@ -7,7 +7,7 @@ logger = get_logger()
 
 @event_bus.on("device_ws_connected")
 async def handle_connect(device_id, websocket):
-    logger.info(f'✅ Device {device_id} connected.')
+    logger.critical(f'✅ Device {device_id} connected.')
 
 
 @event_bus.on("message_from_device")
