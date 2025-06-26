@@ -1,11 +1,13 @@
+import asyncio
+
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from app.config import BOT_TOKEN
 import pytz
 from datetime import datetime
 
-from telegram_client.routers import user_rt
-from telegram_client.logger_config import get_logger
+from clients.telegram_client.routers import user_rt
+from clients.telegram_client.logger_config import get_logger
 
 logger = get_logger()
 
@@ -27,3 +29,7 @@ async def run_telegram_bot():
     setup_routers()
     logger.info("Telegram bot starting")
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+
+if __name__ == "__main__":
+    asyncio.run(run_telegram_bot())
+

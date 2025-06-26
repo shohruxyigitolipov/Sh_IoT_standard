@@ -3,7 +3,7 @@ import datetime
 import json
 from typing import Literal, Dict, cast
 
-from device_client.logger_config import get_logger
+from .logger_config import get_logger
 
 logger = get_logger("device_client")
 
@@ -28,9 +28,8 @@ class DeviceImitator:
             self.pin_schedule[pin] = {'on_time': '12:00', 'off_time': '13:00'}
         logger.info(f"Initial pin schedule: {self.pin_schedule}")
 
-    async def set_ws(self, websocket):
-        self.ws = websocket
-        logger.info("WebSocket connection established")
+    async def set_ws(self, ws):
+        self.ws = ws
 
     async def report_to(self, pin: int = None):
         if not pin:

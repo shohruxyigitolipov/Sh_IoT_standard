@@ -18,18 +18,17 @@ async def verify_auth_token(token):
 
 
 class DeviceWebSocketSession:
-    async def handle(self, websocket: WebSocket, device_id: int):
-        if not await self._authenticate(websocket, device_id):
-            event_bus.emit('device_ws_wrong_auth_token', websocket)
+    async def handle(self, ws: WebSocket, device_id: int):
+        if not await self._authenticate(ws, device_id):
+            event_bus.emit('device_ws_wrong_auth_token', ws)
             await asyncio.sleep(3)
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            await ws.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-        event_bus.emit('device_ws_connected', device_id, websocket)
-        await device_ws_manager.add(device_id, websocket)
+        await device_ws_manager.add(device_id, ws)
 
         device_last_pong[device_id] = time.monotonic()
-        listen_task = asyncio.create_task(self._listen(websocket, device_id))
-        ping_task = asyncio.create_task(self.ping_pong(websocket, device_id))
+        listen_task = asyncio.create_task(self._listen(ws, device_id))
+        ping_task = asyncio.create_task(self.ping_pong(ws, device_id))
         try:
             await listen_task
         finally:
@@ -37,11 +36,11 @@ class DeviceWebSocketSession:
             await device_ws_manager.remove(device_id)
 
     @staticmethod
-    async def _authenticate(websocket: WebSocket, device_id: int) -> bool:
+    async def _authenticate(ws: WebSocket, device_id: int) -> bool:
         try:
-            data = await asyncio.wait_for(websocket.receive_json(), timeout=15)
+            data = await asyncio.wait_for(ws.receive_json(), timeout=15)
         except asyncio.TimeoutError:
-            event_bus.emit('device_ws_timeout', websocket)
+            event_bus.emit('device_ws_timeout', ws)
             return False
 
         token = data.get("auth_token") if isinstance(data, dict) else None
@@ -49,35 +48,32 @@ class DeviceWebSocketSession:
         return verified
 
     @staticmethod
-    async def ping_pong(websocket: WebSocket, device_id):
+    async def ping_pong(ws: WebSocket, device_id):
 
         while True:
-            await websocket.send_text("ping")
+            await ws.send_text("ping")
             last = device_last_pong.get(device_id)
             now = time.monotonic()
 
             if last is None or (now - last > 10):
                 logger.warning(f"[PING] No pong from {device_id} for >10s")
-                event_bus.emit("device_ws_disconnected", device_id)
                 await device_ws_manager.remove(device_id)
                 break
             await asyncio.sleep(5)
 
     @staticmethod
-    async def _listen(websocket: WebSocket, device_id: int):
+    async def _listen(ws: WebSocket, device_id: int):
         try:
             while True:
-                msg = await websocket.receive_text()
+                msg = await ws.receive_text()
                 if msg.strip().lower() == "pong":
                     device_last_pong[device_id] = time.monotonic()
                     continue
                 event_bus.emit("message_from_device", device_id, msg)
         except (asyncio.CancelledError, WebSocketDisconnect):
-            event_bus.emit("device_ws_disconnected", device_id)
             await device_ws_manager.remove(device_id)
         except Exception as e:
-            logger.exception(f"Device WS error {device_id}: {e}")
-            event_bus.emit("device_ws_disconnected", device_id)
+            logger.exception(f"[{device_id}] Device WS error : {e}")
             await device_ws_manager.remove(device_id)
 
 
